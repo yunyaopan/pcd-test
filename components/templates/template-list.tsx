@@ -17,6 +17,7 @@ export function TemplateList() {
   const [projects, setProjects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [preview, setPreview] = useState<PreviewState>({ templateId: null, projectId: null, content: null });
+  const [showDropdownFor, setShowDropdownFor] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([listTemplates(), listProjects()]).then(([t, p]) => {
@@ -42,6 +43,12 @@ export function TemplateList() {
   async function onSelectProject(templateId: string, projectId: string) {
     const { preview: pv } = await previewDocument({ templateId, projectId });
     setPreview({ templateId, projectId, content: pv.content });
+    setShowDropdownFor(null); // Hide dropdown after selection
+  }
+
+  function handleNewDocClick(templateId: string) {
+    setShowDropdownFor(templateId);
+    setPreview({ templateId: null, projectId: null, content: null }); // Clear previous preview
   }
 
   const projectOptions = useMemo(() => projects.map(p => ({ id: p.id, name: p.name })), [projects]);
@@ -71,27 +78,38 @@ export function TemplateList() {
               <CardTitle className="flex items-center justify-between">
                 <span>{t.name}</span>
                 <div className="flex items-center gap-2">
-                  <select
-                    className="border rounded px-2 py-1 text-sm"
-                    onChange={e => onSelectProject(t.id, e.target.value)}
-                    defaultValue=""
-                  >
-                    <option value="" disabled>
-                      Select project
-                    </option>
-                    {projectOptions.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
+                  {showDropdownFor === t.id ? (
+                    <select
+                      className="border rounded px-2 py-1 text-sm"
+                      onChange={e => onSelectProject(t.id, e.target.value)}
+                      defaultValue=""
+                    >
+                      <option value="" disabled>
+                        Select project
                       </option>
-                    ))}
-                  </select>
-                  <Button variant="secondary">New doc</Button>
+                      {projectOptions.map(p => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <Button 
+                      variant="secondary" 
+                      onClick={() => handleNewDocClick(t.id)}
+                    >
+                      New doc
+                    </Button>
+                  )}
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
               {preview.templateId === t.id && preview.content && (
-                <pre className="whitespace-pre-wrap text-sm bg-muted p-3 rounded border">{preview.content}</pre>
+                <div className="mt-4">
+                  <h4 className="font-medium mb-2">Document Preview:</h4>
+                  <pre className="whitespace-pre-wrap text-sm bg-muted p-3 rounded border">{preview.content}</pre>
+                </div>
               )}
             </CardContent>
           </Card>
