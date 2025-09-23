@@ -1,7 +1,7 @@
 export interface ProjectDto {
   id: string;
   name: string;
-  parameters: Record<string, unknown> | null;
+  customer_name: string | null;
   created_at: string;
 }
 

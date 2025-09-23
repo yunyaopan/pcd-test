@@ -30,13 +30,14 @@ export async function POST(req: NextRequest) {
 
   const { data: project, error: pErr } = await supabase
     .from("projects")
-    .select("id,name,parameters")
+    .select("id,name,customer_name")
     .eq("id", projectId)
     .single();
   if (pErr || !project) return NextResponse.json({ error: pErr?.message || "Project not found" }, { status: 404 });
 
   const templateText = template.template_text || "";
-  const merged = mergeTemplate(templateText, project.parameters || {});
+  const paramObject = { customer: { Name: project.customer_name } } as Record<string, unknown>;
+  const merged = mergeTemplate(templateText, paramObject);
 
   return NextResponse.json({ preview: { templateName: template.name, projectName: project.name, content: merged } });
 }
