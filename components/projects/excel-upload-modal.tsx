@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { X, Upload, Check } from "lucide-react";
 import * as XLSX from "xlsx";
@@ -57,7 +56,7 @@ export function ExcelUploadModal({ onClose, onProjectCreated }: ExcelUploadModal
     }
   }
 
-  function extractProjectData(data: any[][]): ExtractedData {
+  function extractProjectData(data: unknown[][]): ExtractedData {
     // Look for the specific fields in the Excel data
     let documentNo = '';
     let referenceNo = '';
@@ -152,9 +151,9 @@ export function ExcelUploadModal({ onClose, onProjectCreated }: ExcelUploadModal
     <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-4 border-b">
-          <CardTitle>
+          <h2 className="text-lg font-semibold">
             {step === 'upload' ? 'Upload Excel File' : 'Confirm Project Data'}
-          </CardTitle>
+          </h2>
           <Button variant="outline" size="sm" onClick={onClose}>
             <X className="w-4 h-4" />
           </Button>
