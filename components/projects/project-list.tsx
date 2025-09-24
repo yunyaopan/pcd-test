@@ -3,13 +3,13 @@ import { useEffect, useState } from "react";
 import { listProjects, ProjectDto } from "@/lib/api/projects";
 import { Button } from "@/components/ui/button";
 import { Plus, Eye } from "lucide-react";
-import { ExcelUploadModal } from "./excel-upload-modal";
+import { EvaluationApproachModal } from "./evaluation-approach-modal";
 import Link from "next/link";
 
 export function ProjectList() {
   const [projects, setProjects] = useState<ProjectDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showEvaluationModal, setShowEvaluationModal] = useState(false);
 
   useEffect(() => {
     loadProjects();
@@ -28,7 +28,7 @@ export function ProjectList() {
   }
 
   function handleProjectCreated() {
-    setShowUploadModal(false);
+    setShowEvaluationModal(false);
     loadProjects(); // Refresh the list
   }
 
@@ -36,7 +36,7 @@ export function ProjectList() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Projects</h1>
-        <Button onClick={() => setShowUploadModal(true)}>
+        <Button onClick={() => setShowEvaluationModal(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Create New Project
         </Button>
@@ -73,14 +73,14 @@ export function ProjectList() {
 
       {projects.length === 0 && !isLoading && (
         <div className="text-center py-8 text-gray-500">
-          No projects found. Create your first project by uploading an Excel file.
+          No projects found. Create your first project by selecting an evaluation approach.
         </div>
       )}
 
-      {/* Excel Upload Modal */}
-      {showUploadModal && (
-        <ExcelUploadModal
-          onClose={() => setShowUploadModal(false)}
+      {/* Evaluation Approach Modal */}
+      {showEvaluationModal && (
+        <EvaluationApproachModal
+          onClose={() => setShowEvaluationModal(false)}
           onProjectCreated={handleProjectCreated}
         />
       )}

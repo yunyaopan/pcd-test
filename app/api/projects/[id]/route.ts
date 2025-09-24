@@ -21,6 +21,7 @@ export async function GET(
       suppliers_count,
       status,
       created_at,
+      evaluation_approach_id,
       tender_submissions (
         id,
         schedule_of_rates_no,
@@ -32,6 +33,14 @@ export async function GET(
         percentage_sign,
         entry_date,
         supplier_remarks
+      ),
+      evaluation_approaches (
+        id,
+        name,
+        price_percentage,
+        safety_percentage,
+        technical_percentage,
+        technical_criteria
       )
     `)
     .eq("id", projectId)

@@ -1,9 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ProjectDto } from "@/lib/api/projects";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Calendar, FileText, Users, Hash } from "lucide-react";
+import { ArrowLeft, FileText, Users, BarChart3 } from "lucide-react";
 import Link from "next/link";
 
 interface ProjectDetailProps {
@@ -15,11 +15,7 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadProject();
-  }, [projectId]);
-
-  async function loadProject() {
+  const loadProject = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/projects/${projectId}`);
@@ -34,7 +30,11 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [projectId]);
+
+  useEffect(() => {
+    loadProject();
+  }, [projectId, loadProject]);
 
   if (isLoading) {
     return (
@@ -128,6 +128,82 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Evaluation Criteria */}
+      {project.evaluation_approaches && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <BarChart3 className="w-5 h-5 mr-2" />
+              Evaluation Criteria - {project.evaluation_approaches.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="border border-gray-300 p-3 text-left font-medium">Criteria</th>
+                    <th className="border border-gray-300 p-3 text-left font-medium">Percentage</th>
+                    <th className="border border-gray-300 p-3 text-left font-medium">Scoring Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border border-gray-300 p-3 font-medium text-green-700">Price</td>
+                    <td className="border border-gray-300 p-3 text-center font-bold text-green-600">
+                      {project.evaluation_approaches.price_percentage}%
+                    </td>
+                    <td className="border border-gray-300 p-3">
+                      <span className="text-gray-500">Price-based evaluation</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 p-3 font-medium text-red-700">Safety</td>
+                    <td className="border border-gray-300 p-3 text-center font-bold text-red-600">
+                      {project.evaluation_approaches.safety_percentage}%
+                    </td>
+                    <td className="border border-gray-300 p-3">
+                      <span className="text-gray-500">Safety compliance evaluation</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 p-3 font-medium text-blue-700">Technical</td>
+                    <td className="border border-gray-300 p-3 text-center font-bold text-blue-600">
+                      {project.evaluation_approaches.technical_percentage}%
+                    </td>
+                    <td className="border border-gray-300 p-3">
+                      {project.evaluation_approaches.technical_criteria ? (
+                        <ul className="list-disc list-inside space-y-1 text-sm">
+                          {Object.entries(project.evaluation_approaches.technical_criteria).map(([points, description]) => (
+                            <li key={points} className="flex items-start">
+                              <span className="font-medium text-blue-600 mr-2">{points}:</span>
+                              <span className="text-gray-700">{description}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <span className="text-gray-500">Technical proposal evaluation</span>
+                      )}
+                    </td>
+                  </tr>
+                  <tr className="bg-gray-50">
+                    <td className="border border-gray-300 p-3 font-bold">Total</td>
+                    <td className="border border-gray-300 p-3 text-center font-bold">
+                      {project.evaluation_approaches.price_percentage + 
+                       project.evaluation_approaches.safety_percentage + 
+                       project.evaluation_approaches.technical_percentage}%
+                    </td>
+                    <td className="border border-gray-300 p-3">
+                      <span className="text-gray-500">Complete evaluation criteria</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Tender Submissions */}
       {project.tender_submissions && project.tender_submissions.length > 0 && (

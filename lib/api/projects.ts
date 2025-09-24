@@ -11,6 +11,15 @@ export interface TenderSubmission {
   supplier_remarks: string | null;
 }
 
+export interface EvaluationApproach {
+  id: string;
+  name: string;
+  price_percentage: number;
+  safety_percentage: number;
+  technical_percentage: number;
+  technical_criteria: Record<string, string> | null;
+}
+
 export interface ProjectDto {
   id: string;
   name: string;
@@ -21,7 +30,9 @@ export interface ProjectDto {
   description: string | null;
   suppliers_count: number | null;
   status: string | null;
+  evaluation_approach_id: string | null;
   tender_submissions: TenderSubmission[] | null;
+  evaluation_approaches: EvaluationApproach | null;
   created_at: string;
 }
 

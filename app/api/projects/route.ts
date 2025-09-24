@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
     description,
     suppliers_count,
     status,
+    evaluation_approach_id,
     tender_submissions
   } = body;
 
@@ -79,6 +80,7 @@ export async function POST(req: NextRequest) {
       description,
       suppliers_count: suppliers_count || 0,
       status: status || 'submit evaluation criteria',
+      evaluation_approach_id,
     })
     .select("id,name,document_no,reference_no,publication_date,closing_date,description,suppliers_count,status,created_at")
     .single();
