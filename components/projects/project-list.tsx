@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import { listProjects, ProjectDto } from "@/lib/api/projects";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Eye } from "lucide-react";
 import { ExcelUploadModal } from "./excel-upload-modal";
+import Link from "next/link";
 
 export function ProjectList() {
   const [projects, setProjects] = useState<ProjectDto[]>([]);
@@ -46,7 +47,7 @@ export function ProjectList() {
       ) : (
         <div className="space-y-2">
           {projects.map(project => (
-            <div key={project.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+            <div key={project.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
               <div className="flex-1">
                 <h3 className="text-lg font-medium">{project.name}</h3>
               </div>
@@ -58,6 +59,12 @@ export function ProjectList() {
                 }`}>
                   {project.status || 'submit evaluation criteria'}
                 </span>
+                <Link href={`/protected/projects/${project.id}`}>
+                  <Button variant="outline" size="sm">
+                    <Eye className="w-4 h-4 mr-2" />
+                    View Details
+                  </Button>
+                </Link>
               </div>
             </div>
           ))}
