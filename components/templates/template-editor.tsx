@@ -245,6 +245,7 @@ export function TemplateEditor() {
             <div className="text-xs text-blue-700 space-y-1">
               <div><strong>Customer:</strong> <code className="bg-blue-100 px-1 rounded">{"{{customer.Name}}"}</code></div>
               <div><strong>Project:</strong> <code className="bg-blue-100 px-1 rounded">{"{{project.document_no}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.reference_no}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.publication_date}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.closing_date}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.description}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.suppliers_count}}"}</code></div>
+              <div><strong>Tender Submissions Table:</strong> <code className="bg-blue-100 px-1 rounded">{"{{tender_submissions_table}}"}</code> - Displays all tender submissions in a formatted table</div>
             </div>
           </div>
         </CardContent>
