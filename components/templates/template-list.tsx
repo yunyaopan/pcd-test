@@ -13,8 +13,8 @@ interface PreviewState {
 }
 
 export function TemplateList() {
-  const [templates, setTemplates] = useState<any[]>([]);
-  const [projects, setProjects] = useState<any[]>([]);
+  const [templates, setTemplates] = useState<TemplateDto[]>([]);
+  const [projects, setProjects] = useState<ProjectDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [preview, setPreview] = useState<PreviewState>({ templateId: null, projectId: null, content: null });
   const [showDropdownFor, setShowDropdownFor] = useState<string | null>(null);
