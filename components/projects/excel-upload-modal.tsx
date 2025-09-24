@@ -5,6 +5,18 @@ import { Input } from "@/components/ui/input";
 import { X, Upload, Check } from "lucide-react";
 import * as XLSX from "xlsx";
 
+interface TenderSubmission {
+  scheduleOfRatesNo: string;
+  tradingPartnerReferenceNo: string;
+  supplierName: string;
+  responseNo: string;
+  scheduleOfRatesDescription: string;
+  percentageAdjustment: number;
+  percentageSign: string;
+  entryDate: string;
+  supplierRemarks: string;
+}
+
 interface ExtractedData {
   documentNo: string;
   referenceNo: string;
@@ -12,6 +24,7 @@ interface ExtractedData {
   closingDate: string;
   description: string;
   suppliersCount: number;
+  tenderSubmissions: TenderSubmission[];
 }
 
 interface ExcelUploadModalProps {
@@ -64,6 +77,7 @@ export function ExcelUploadModal({ onClose, onProjectCreated }: ExcelUploadModal
     let closingDate = '';
     let description = '';
     let suppliersCount = 0;
+    let tenderSubmissions: TenderSubmission[] = [];
 
     // Search through the data to find the fields
     for (let i = 0; i < data.length; i++) {
@@ -98,6 +112,9 @@ export function ExcelUploadModal({ onClose, onProjectCreated }: ExcelUploadModal
             if (i + 1 < data.length && data[i + 1] && data[i + 1][j] !== undefined) {
               suppliersCount = parseInt(String(data[i + 1][j] || '0')) || 0;
             }
+          } else if (cell.includes('Schedule Of Rates No.')) {
+            // Found the tender submissions table header
+            tenderSubmissions = extractTenderSubmissions(data, i);
           }
         }
       }
@@ -109,8 +126,43 @@ export function ExcelUploadModal({ onClose, onProjectCreated }: ExcelUploadModal
       publicationDate,
       closingDate,
       description,
-      suppliersCount
+      suppliersCount,
+      tenderSubmissions
     };
+  }
+
+  function extractTenderSubmissions(data: unknown[][], headerRowIndex: number): TenderSubmission[] {
+    const submissions: TenderSubmission[] = [];
+    
+    // Start from the row after the header
+    for (let i = headerRowIndex + 1; i < data.length; i++) {
+      const row = data[i];
+      
+      // Check if row is empty (end of data)
+      if (!row || row.every(cell => !cell || String(cell).trim() === '')) {
+        break;
+      }
+      
+      // Extract data from the row
+      const submission: TenderSubmission = {
+        scheduleOfRatesNo: String(row[0] || ''),
+        tradingPartnerReferenceNo: String(row[1] || ''),
+        supplierName: String(row[2] || ''),
+        responseNo: String(row[3] || ''),
+        scheduleOfRatesDescription: String(row[4] || ''),
+        percentageAdjustment: parseFloat(String(row[5] || '0')) || 0,
+        percentageSign: String(row[6] || ''),
+        entryDate: String(row[7] || ''),
+        supplierRemarks: String(row[8] || '')
+      };
+      
+      // Only add if it has at least some data
+      if (submission.scheduleOfRatesNo || submission.supplierName) {
+        submissions.push(submission);
+      }
+    }
+    
+    return submissions;
   }
 
   async function handleConfirmAndSave() {
@@ -131,6 +183,7 @@ export function ExcelUploadModal({ onClose, onProjectCreated }: ExcelUploadModal
           closing_date: extractedData.closingDate,
           description: extractedData.description,
           suppliers_count: extractedData.suppliersCount,
+          tender_submissions: extractedData.tenderSubmissions,
         }),
       });
 
@@ -211,7 +264,7 @@ export function ExcelUploadModal({ onClose, onProjectCreated }: ExcelUploadModal
             <div className="space-y-4">
               <div className="bg-green-50 p-4 rounded-md">
                 <h4 className="font-medium text-green-800 mb-2">Extracted Data:</h4>
-                <div className="grid gap-2 text-sm">
+                <div className="grid gap-2 text-sm mb-4">
                   <div><strong>Document No.:</strong> {extractedData.documentNo || 'Not found'}</div>
                   <div><strong>Reference No.:</strong> {extractedData.referenceNo || 'Not found'}</div>
                   <div><strong>Publication Date:</strong> {extractedData.publicationDate || 'Not found'}</div>
@@ -219,6 +272,36 @@ export function ExcelUploadModal({ onClose, onProjectCreated }: ExcelUploadModal
                   <div><strong>Description:</strong> {extractedData.description || 'Not found'}</div>
                   <div><strong>Suppliers Count:</strong> {extractedData.suppliersCount || 'Not found'}</div>
                 </div>
+                
+                {extractedData.tenderSubmissions.length > 0 && (
+                  <div>
+                    <h5 className="font-medium text-green-800 mb-2">Tender Submissions ({extractedData.tenderSubmissions.length}):</h5>
+                    <div className="max-h-40 overflow-y-auto">
+                      <table className="w-full text-xs border-collapse border border-gray-300">
+                        <thead>
+                          <tr className="bg-gray-100">
+                            <th className="border border-gray-300 p-1">Schedule No.</th>
+                            <th className="border border-gray-300 p-1">Supplier</th>
+                            <th className="border border-gray-300 p-1">Response No.</th>
+                            <th className="border border-gray-300 p-1">Adjustment</th>
+                            <th className="border border-gray-300 p-1">Sign</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {extractedData.tenderSubmissions.map((submission, index) => (
+                            <tr key={index}>
+                              <td className="border border-gray-300 p-1">{submission.scheduleOfRatesNo}</td>
+                              <td className="border border-gray-300 p-1">{submission.supplierName}</td>
+                              <td className="border border-gray-300 p-1">{submission.responseNo}</td>
+                              <td className="border border-gray-300 p-1">{submission.percentageAdjustment}</td>
+                              <td className="border border-gray-300 p-1">{submission.percentageSign}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end gap-2">

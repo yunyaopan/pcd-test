@@ -1,3 +1,16 @@
+export interface TenderSubmission {
+  id: string;
+  schedule_of_rates_no: string;
+  trading_partner_reference_no: string;
+  supplier_name: string;
+  response_no: string;
+  schedule_of_rates_description: string | null;
+  percentage_adjustment: number | null;
+  percentage_sign: string | null;
+  entry_date: string | null;
+  supplier_remarks: string | null;
+}
+
 export interface ProjectDto {
   id: string;
   name: string;
@@ -7,6 +20,7 @@ export interface ProjectDto {
   closing_date: string | null;
   description: string | null;
   suppliers_count: number | null;
+  tender_submissions: TenderSubmission[] | null;
   created_at: string;
 }
 

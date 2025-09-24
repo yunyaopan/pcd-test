@@ -68,6 +68,11 @@ export function ProjectList() {
                   <div>
                     <span className="font-medium">Suppliers:</span> {project.suppliers_count || 'N/A'}
                   </div>
+                  {project.tender_submissions && project.tender_submissions.length > 0 && (
+                    <div>
+                      <span className="font-medium">Tender Submissions:</span> {project.tender_submissions.length}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
