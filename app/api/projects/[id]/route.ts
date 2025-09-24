@@ -56,3 +56,77 @@ export async function GET(
 
   return NextResponse.json({ project });
 }
+
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: projectId } = await params;
+  const supabase = await createClient();
+  const body = await req.json();
+  
+  const {
+    document_no,
+    reference_no,
+    publication_date,
+    closing_date,
+    description,
+    suppliers_count,
+    tender_submissions
+  } = body;
+
+  // First, update the project
+  const { data: project, error: projectError } = await supabase
+    .from("projects")
+    .update({
+      document_no,
+      reference_no,
+      publication_date,
+      closing_date,
+      description,
+      suppliers_count: suppliers_count || 0,
+    })
+    .eq("id", projectId)
+    .select("id,name,document_no,reference_no,publication_date,closing_date,description,suppliers_count,status,created_at")
+    .single();
+
+  if (projectError) return NextResponse.json({ error: projectError.message }, { status: 500 });
+
+  // Delete existing tender submissions and insert new ones
+  if (tender_submissions && tender_submissions.length > 0) {
+    // Delete existing tender submissions
+    const { error: deleteError } = await supabase
+      .from("tender_submissions")
+      .delete()
+      .eq("project_id", projectId);
+
+    if (deleteError) {
+      console.error("Failed to delete existing tender submissions:", deleteError);
+    }
+
+    // Insert new tender submissions
+    const submissionsData = tender_submissions.map((submission: any) => ({
+      project_id: projectId,
+      schedule_of_rates_no: submission.scheduleOfRatesNo,
+      trading_partner_reference_no: submission.tradingPartnerReferenceNo,
+      supplier_name: submission.supplierName,
+      response_no: submission.responseNo,
+      schedule_of_rates_description: submission.scheduleOfRatesDescription,
+      percentage_adjustment: submission.percentageAdjustment,
+      percentage_sign: submission.percentageSign,
+      entry_date: submission.entryDate,
+      supplier_remarks: submission.supplierRemarks,
+    }));
+
+    const { error: submissionsError } = await supabase
+      .from("tender_submissions")
+      .insert(submissionsData);
+
+    if (submissionsError) {
+      console.error("Failed to insert tender submissions:", submissionsError);
+      // Continue anyway - project is updated
+    }
+  }
+
+  return NextResponse.json({ project }, { status: 200 });
+}

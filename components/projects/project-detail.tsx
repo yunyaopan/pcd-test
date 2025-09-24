@@ -3,8 +3,9 @@ import { useEffect, useState, useCallback } from "react";
 import { ProjectDto } from "@/lib/api/projects";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, FileText, Users, BarChart3, FileCheck, X } from "lucide-react";
+import { ArrowLeft, FileText, Users, BarChart3, FileCheck, X, Upload } from "lucide-react";
 import Link from "next/link";
+import { ExcelUploadModal } from "./excel-upload-modal";
 
 interface ProjectDetailProps {
   projectId: string;
@@ -31,6 +32,7 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
   });
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [isGeneratingTCB, setIsGeneratingTCB] = useState(false);
+  const [showExcelUploadModal, setShowExcelUploadModal] = useState(false);
 
   const loadProject = useCallback(async () => {
     setIsLoading(true);
@@ -149,6 +151,13 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
         </div>
         <div className="flex items-center space-x-2">
           <Button
+            variant="outline"
+            onClick={() => setShowExcelUploadModal(true)}
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Upload Gebiz Excel
+          </Button>
+          <Button
             onClick={handleCreateTCBPaper}
             disabled={isGeneratingTCB}
             className="bg-green-600 hover:bg-green-700"
@@ -168,49 +177,7 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
         </div>
       </div>
 
-      {/* Project Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <FileText className="w-5 h-5 mr-2" />
-            Project Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium text-gray-500">Document No.</label>
-                <p className="text-sm">{project.document_no || 'N/A'}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">Reference No.</label>
-                <p className="text-sm">{project.reference_no || 'N/A'}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">Description</label>
-                <p className="text-sm">{project.description || 'N/A'}</p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium text-gray-500">Publication Date</label>
-                <p className="text-sm">{project.publication_date || 'N/A'}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">Closing Date</label>
-                <p className="text-sm">{project.closing_date || 'N/A'}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">Suppliers Count</label>
-                <p className="text-sm">{project.suppliers_count || 'N/A'}</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Evaluation Criteria */}
+      {/* Evaluation Criteria - First Card */}
       {project.evaluation_approaches && (
         <Card>
           <CardHeader>
@@ -286,55 +253,93 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
         </Card>
       )}
 
-      {/* Tender Submissions */}
-      {project.tender_submissions && project.tender_submissions.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Users className="w-5 h-5 mr-2" />
-              Tender Submissions ({project.tender_submissions.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-300">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="border border-gray-300 p-3 text-left font-medium">S/N</th>
-                    <th className="border border-gray-300 p-3 text-left font-medium">Supplier Name</th>
-                    <th className="border border-gray-300 p-3 text-left font-medium">Schedule No.</th>
-                    <th className="border border-gray-300 p-3 text-left font-medium">Response No.</th>
-                    <th className="border border-gray-300 p-3 text-left font-medium">Adjustment</th>
-                    <th className="border border-gray-300 p-3 text-left font-medium">Sign</th>
-                    <th className="border border-gray-300 p-3 text-left font-medium">Entry Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {project.tender_submissions.map((submission, index) => (
-                    <tr key={submission.id} className="hover:bg-gray-50">
-                      <td className="border border-gray-300 p-3 text-center">{index + 1}</td>
-                      <td className="border border-gray-300 p-3">{submission.supplier_name}</td>
-                      <td className="border border-gray-300 p-3">{submission.schedule_of_rates_no}</td>
-                      <td className="border border-gray-300 p-3">{submission.response_no}</td>
-                      <td className="border border-gray-300 p-3 text-center">{submission.percentage_adjustment || 'N/A'}</td>
-                      <td className="border border-gray-300 p-3 text-center">{submission.percentage_sign || 'N/A'}</td>
-                      <td className="border border-gray-300 p-3">{submission.entry_date || 'N/A'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      {/* Project Information and Tender Submissions - Combined Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <FileText className="w-5 h-5 mr-2" />
+            Gebiz submissions
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Project Information Section */}
+          <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Document No.</label>
+                  <p className="text-sm">{project.document_no || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Reference No.</label>
+                  <p className="text-sm">{project.reference_no || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Description</label>
+                  <p className="text-sm">{project.description || 'N/A'}</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Publication Date</label>
+                  <p className="text-sm">{project.publication_date || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Closing Date</label>
+                  <p className="text-sm">{project.closing_date || 'N/A'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Suppliers Count</label>
+                  <p className="text-sm">{project.suppliers_count || 'N/A'}</p>
+                </div>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
 
-      {(!project.tender_submissions || project.tender_submissions.length === 0) && (
-        <Card>
-          <CardContent className="text-center py-8">
-            <p className="text-gray-500">No tender submissions found for this project.</p>
-          </CardContent>
-        </Card>
-      )}
+          {/* Tender Submissions Section */}
+          <div>
+            <h4 className="text-lg font-medium mb-4 flex items-center">
+              <Users className="w-5 h-5 mr-2" />
+              Tender Submissions {project.tender_submissions && project.tender_submissions.length > 0 && `(${project.tender_submissions.length})`}
+            </h4>
+            
+            {project.tender_submissions && project.tender_submissions.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="border border-gray-300 p-3 text-left font-medium">S/N</th>
+                      <th className="border border-gray-300 p-3 text-left font-medium">Supplier Name</th>
+                      <th className="border border-gray-300 p-3 text-left font-medium">Schedule No.</th>
+                      <th className="border border-gray-300 p-3 text-left font-medium">Response No.</th>
+                      <th className="border border-gray-300 p-3 text-left font-medium">Adjustment</th>
+                      <th className="border border-gray-300 p-3 text-left font-medium">Sign</th>
+                      <th className="border border-gray-300 p-3 text-left font-medium">Entry Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {project.tender_submissions.map((submission, index) => (
+                      <tr key={submission.id} className="hover:bg-gray-50">
+                        <td className="border border-gray-300 p-3 text-center">{index + 1}</td>
+                        <td className="border border-gray-300 p-3">{submission.supplier_name}</td>
+                        <td className="border border-gray-300 p-3">{submission.schedule_of_rates_no}</td>
+                        <td className="border border-gray-300 p-3">{submission.response_no}</td>
+                        <td className="border border-gray-300 p-3 text-center">{submission.percentage_adjustment || 'N/A'}</td>
+                        <td className="border border-gray-300 p-3 text-center">{submission.percentage_sign || 'N/A'}</td>
+                        <td className="border border-gray-300 p-3">{submission.entry_date || 'N/A'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No tender submissions found for this project.</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* TCB Paper Preview Modal */}
       {showPreviewModal && (
@@ -367,6 +372,18 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Excel Upload Modal */}
+      {showExcelUploadModal && (
+        <ExcelUploadModal
+          onClose={() => setShowExcelUploadModal(false)}
+          onProjectCreated={() => {
+            setShowExcelUploadModal(false);
+            loadProject(); // Refresh the project data
+          }}
+          projectId={projectId}
+        />
       )}
     </div>
   );

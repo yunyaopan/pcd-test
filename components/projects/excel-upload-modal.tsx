@@ -30,9 +30,10 @@ interface ExtractedData {
 interface ExcelUploadModalProps {
   onClose: () => void;
   onProjectCreated: () => void;
+  projectId?: string; // Optional projectId for updating existing project
 }
 
-export function ExcelUploadModal({ onClose, onProjectCreated }: ExcelUploadModalProps) {
+export function ExcelUploadModal({ onClose, onProjectCreated, projectId }: ExcelUploadModalProps) {
   const [step, setStep] = useState<'upload' | 'confirm'>('upload');
   const [file, setFile] = useState<File | null>(null);
   const [extractedData, setExtractedData] = useState<ExtractedData | null>(null);
@@ -170,26 +171,50 @@ export function ExcelUploadModal({ onClose, onProjectCreated }: ExcelUploadModal
 
     setIsSaving(true);
     try {
-      const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: extractedData.documentNo || 'Untitled Project',
-          document_no: extractedData.documentNo,
-          reference_no: extractedData.referenceNo,
-          publication_date: extractedData.publicationDate,
-          closing_date: extractedData.closingDate,
-          description: extractedData.description,
-          suppliers_count: extractedData.suppliersCount,
-          status: 'submit evaluation criteria', // Default status for new projects
-          tender_submissions: extractedData.tenderSubmissions,
-        }),
-      });
+      if (projectId) {
+        // Update existing project
+        const response = await fetch(`/api/projects/${projectId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            document_no: extractedData.documentNo,
+            reference_no: extractedData.referenceNo,
+            publication_date: extractedData.publicationDate,
+            closing_date: extractedData.closingDate,
+            description: extractedData.description,
+            suppliers_count: extractedData.suppliersCount,
+            tender_submissions: extractedData.tenderSubmissions,
+          }),
+        });
 
-      if (!response.ok) {
-        throw new Error('Failed to save project');
+        if (!response.ok) {
+          throw new Error('Failed to update project');
+        }
+      } else {
+        // Create new project
+        const response = await fetch('/api/projects', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: extractedData.documentNo || 'Untitled Project',
+            document_no: extractedData.documentNo,
+            reference_no: extractedData.referenceNo,
+            publication_date: extractedData.publicationDate,
+            closing_date: extractedData.closingDate,
+            description: extractedData.description,
+            suppliers_count: extractedData.suppliersCount,
+            status: 'submit evaluation criteria', // Default status for new projects
+            tender_submissions: extractedData.tenderSubmissions,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save project');
+        }
       }
 
       onProjectCreated();
@@ -313,7 +338,7 @@ export function ExcelUploadModal({ onClose, onProjectCreated }: ExcelUploadModal
                   onClick={handleConfirmAndSave}
                   disabled={isSaving}
                 >
-                  {isSaving ? 'Saving...' : 'Create Project'}
+                  {isSaving ? 'Saving...' : (projectId ? 'Upload Gebiz Data' : 'Create Project')}
                 </Button>
               </div>
             </div>
