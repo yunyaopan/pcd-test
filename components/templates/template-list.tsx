@@ -5,21 +5,30 @@ import { listProjects, previewDocument, ProjectDto } from "@/lib/api/projects";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import Link from "next/link";
 
 interface PreviewState {
   templateId: string | null;
   projectId: string | null;
   content: string | null;
+  templateName: string | null;
+  projectName: string | null;
 }
 
 export function TemplateList() {
   const [templates, setTemplates] = useState<TemplateDto[]>([]);
   const [projects, setProjects] = useState<ProjectDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [preview, setPreview] = useState<PreviewState>({ templateId: null, projectId: null, content: null });
+  const [preview, setPreview] = useState<PreviewState>({ 
+    templateId: null, 
+    projectId: null, 
+    content: null, 
+    templateName: null, 
+    projectName: null 
+  });
   const [showDropdownFor, setShowDropdownFor] = useState<string | null>(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   useEffect(() => {
     Promise.all([listTemplates(), listProjects()]).then(([t, p]) => {
@@ -44,13 +53,26 @@ export function TemplateList() {
 
   async function onSelectProject(templateId: string, projectId: string) {
     const { preview: pv } = await previewDocument({ templateId, projectId });
-    setPreview({ templateId, projectId, content: pv.content });
+    setPreview({ 
+      templateId, 
+      projectId, 
+      content: pv.content,
+      templateName: pv.templateName,
+      projectName: pv.projectName
+    });
     setShowDropdownFor(null); // Hide dropdown after selection
+    setShowPreviewModal(true); // Show preview modal
   }
 
   function handleNewDocClick(templateId: string) {
     setShowDropdownFor(templateId);
-    setPreview({ templateId: null, projectId: null, content: null }); // Clear previous preview
+    setPreview({ 
+      templateId: null, 
+      projectId: null, 
+      content: null, 
+      templateName: null, 
+      projectName: null 
+    }); // Clear previous preview
   }
 
   const projectOptions = useMemo(() => projects.map(p => ({ id: p.id, name: p.name })), [projects]);
@@ -117,16 +139,44 @@ export function TemplateList() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {preview.templateId === t.id && preview.content && (
-                <div className="mt-4">
-                  <h4 className="font-medium mb-2">Document Preview:</h4>
-                  <pre className="whitespace-pre-wrap text-sm bg-muted p-3 rounded border">{preview.content}</pre>
-                </div>
-              )}
+              {/* Removed inline preview - now shows in modal */}
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {/* Preview Modal */}
+      {showPreviewModal && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b">
+              <div>
+                <h2 className="text-xl font-semibold">Document Preview</h2>
+                <p className="text-sm text-gray-600">
+                  Template: {preview.templateName} | Project: {preview.projectName}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPreviewModal(false)}
+              >
+                <X className="w-4 h-4 mr-2" />
+                Close
+              </Button>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="flex-1 overflow-auto p-6">
+              <div 
+                className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none"
+                dangerouslySetInnerHTML={{ __html: preview.content || '' }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

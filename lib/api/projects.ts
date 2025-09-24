@@ -1,7 +1,12 @@
 export interface ProjectDto {
   id: string;
   name: string;
-  customer_name: string | null;
+  document_no: string | null;
+  reference_no: string | null;
+  publication_date: string | null;
+  closing_date: string | null;
+  description: string | null;
+  suppliers_count: number | null;
   created_at: string;
 }
 
