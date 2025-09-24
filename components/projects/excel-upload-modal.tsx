@@ -71,20 +71,34 @@ export function ExcelUploadModal({ onClose, onProjectCreated }: ExcelUploadModal
       const row = data[i];
       if (Array.isArray(row)) {
         for (let j = 0; j < row.length; j++) {
-          const cell = String(row[j] || '').toLowerCase();
+          const cell = String(row[j] || '');
           
-          if (cell.includes('document no') || cell.includes('document number')) {
-            documentNo = String(row[j + 1] || '');
-          } else if (cell.includes('reference no') || cell.includes('reference number')) {
-            referenceNo = String(row[j + 1] || '');
-          } else if (cell.includes('publication date')) {
-            publicationDate = String(row[j + 1] || '');
-          } else if (cell.includes('closing date')) {
-            closingDate = String(row[j + 1] || '');
-          } else if (cell.includes('description')) {
-            description = String(row[j + 1] || '');
-          } else if (cell.includes('suppliers participated') || cell.includes('no. of suppliers')) {
-            suppliersCount = parseInt(String(row[j + 1] || '0')) || 0;
+          // Updated logic for all fields - look for exact match and get value from next row
+          if (cell.includes('Document No. :')) {
+            // Check if there's a next row and get the value from the same column
+            if (i + 1 < data.length && data[i + 1] && data[i + 1][j] !== undefined) {
+              documentNo = String(data[i + 1][j] || '');
+            }
+          } else if (cell.includes('Reference No. :')) {
+            if (i + 1 < data.length && data[i + 1] && data[i + 1][j] !== undefined) {
+              referenceNo = String(data[i + 1][j] || '');
+            }
+          } else if (cell.includes('Publication Date :')) {
+            if (i + 1 < data.length && data[i + 1] && data[i + 1][j] !== undefined) {
+              publicationDate = String(data[i + 1][j] || '');
+            }
+          } else if (cell.includes('Closing Date :')) {
+            if (i + 1 < data.length && data[i + 1] && data[i + 1][j] !== undefined) {
+              closingDate = String(data[i + 1][j] || '');
+            }
+          } else if (cell.includes('Description :')) {
+            if (i + 1 < data.length && data[i + 1] && data[i + 1][j] !== undefined) {
+              description = String(data[i + 1][j] || '');
+            }
+          } else if (cell.includes('No. of Suppliers Participated in this notice :')) {
+            if (i + 1 < data.length && data[i + 1] && data[i + 1][j] !== undefined) {
+              suppliersCount = parseInt(String(data[i + 1][j] || '0')) || 0;
+            }
           }
         }
       }
