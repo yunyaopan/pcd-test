@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { listTemplates, uploadTemplate } from "@/lib/api/templates";
-import { listProjects, previewDocument } from "@/lib/api/projects";
+import { listTemplates, uploadTemplate, TemplateDto } from "@/lib/api/templates";
+import { listProjects, previewDocument, ProjectDto } from "@/lib/api/projects";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
