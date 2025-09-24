@@ -14,10 +14,24 @@ interface TenderSubmission {
   supplier_remarks: string | null;
 }
 
-function generateEvaluationCriteriaTable(evaluationApproach: any): string {
+interface EvaluationApproach {
+  id: string;
+  name: string;
+  price_percentage: number;
+  safety_percentage: number;
+  technical_percentage: number;
+  technical_criteria?: Record<string, string>;
+}
+
+function generateEvaluationCriteriaTable(evaluationApproach: EvaluationApproach | null, tenderSubmissions: TenderSubmission[] = []): string {
   if (!evaluationApproach) {
     return "<p>No evaluation criteria available.</p>";
   }
+
+  // Generate header columns for tender submissions
+  const submissionHeaders = tenderSubmissions.map((submission, index) => 
+    `<th style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold; background-color: #f0f9ff;">${submission.supplier_name || `Supplier ${index + 1}`}</th>`
+  ).join('');
 
   const tableHtml = `
     <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-family: Arial, sans-serif;">
@@ -26,6 +40,7 @@ function generateEvaluationCriteriaTable(evaluationApproach: any): string {
           <th style="border: 1px solid #ddd; padding: 12px; text-align: left; font-weight: bold;">Criteria</th>
           <th style="border: 1px solid #ddd; padding: 12px; text-align: left; font-weight: bold;">Percentage</th>
           <th style="border: 1px solid #ddd; padding: 12px; text-align: left; font-weight: bold;">Scoring Details</th>
+          ${submissionHeaders}
         </tr>
       </thead>
       <tbody>
@@ -33,11 +48,13 @@ function generateEvaluationCriteriaTable(evaluationApproach: any): string {
           <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold; color: #059669;">Price</td>
           <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold; color: #059669;">${evaluationApproach.price_percentage}%</td>
           <td style="border: 1px solid #ddd; padding: 12px; color: #6b7280;">Price-based evaluation</td>
+          ${tenderSubmissions.map(() => '<td style="border: 1px solid #ddd; padding: 12px; text-align: center; color: #9ca3af;">-</td>').join('')}
         </tr>
         <tr>
           <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold; color: #dc2626;">Safety</td>
           <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold; color: #dc2626;">${evaluationApproach.safety_percentage}%</td>
           <td style="border: 1px solid #ddd; padding: 12px; color: #6b7280;">Safety compliance evaluation</td>
+          ${tenderSubmissions.map(() => '<td style="border: 1px solid #ddd; padding: 12px; text-align: center; color: #9ca3af;">-</td>').join('')}
         </tr>
         <tr>
           <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold; color: #2563eb;">Technical</td>
@@ -50,6 +67,7 @@ function generateEvaluationCriteriaTable(evaluationApproach: any): string {
               '<span style="color: #6b7280;">Technical proposal evaluation</span>'
             }
           </td>
+          ${tenderSubmissions.map(() => '<td style="border: 1px solid #ddd; padding: 12px; text-align: center; color: #9ca3af;">-</td>').join('')}
         </tr>
         <tr style="background-color: #f9fafb;">
           <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold;">Total</td>
@@ -57,6 +75,7 @@ function generateEvaluationCriteriaTable(evaluationApproach: any): string {
             ${evaluationApproach.price_percentage + evaluationApproach.safety_percentage + evaluationApproach.technical_percentage}%
           </td>
           <td style="border: 1px solid #ddd; padding: 12px; color: #6b7280;">Complete evaluation criteria</td>
+          ${tenderSubmissions.map(() => '<td style="border: 1px solid #ddd; padding: 12px; text-align: center; color: #9ca3af;">-</td>').join('')}
         </tr>
       </tbody>
     </table>
@@ -239,7 +258,12 @@ export async function POST(req: NextRequest) {
       suppliers_count: project.suppliers_count
     },
     tender_submissions_table: generateTenderSubmissionsTable(project.tender_submissions || []),
-    evaluation_criteria_table: generateEvaluationCriteriaTable(project.evaluation_approaches)
+    evaluation_criteria_table: generateEvaluationCriteriaTable(
+      Array.isArray(project.evaluation_approaches) 
+        ? project.evaluation_approaches[0] 
+        : project.evaluation_approaches, 
+      project.tender_submissions || []
+    )
   } as Record<string, unknown>;
   const merged = mergeTemplate(templateText, paramObject);
 

@@ -105,7 +105,19 @@ export async function PUT(
     }
 
     // Insert new tender submissions
-    const submissionsData = tender_submissions.map((submission: any) => ({
+    interface TenderSubmissionInput {
+      scheduleOfRatesNo: string;
+      tradingPartnerReferenceNo: string;
+      supplierName: string;
+      responseNo: string;
+      scheduleOfRatesDescription: string;
+      percentageAdjustment: number;
+      percentageSign: string;
+      entryDate: string;
+      supplierRemarks: string;
+    }
+    
+    const submissionsData = tender_submissions.map((submission: TenderSubmissionInput) => ({
       project_id: projectId,
       schedule_of_rates_no: submission.scheduleOfRatesNo,
       trading_partner_reference_no: submission.tradingPartnerReferenceNo,

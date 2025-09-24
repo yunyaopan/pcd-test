@@ -65,7 +65,14 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
       if (!templatesResponse.ok) throw new Error('Failed to load templates');
       const { templates } = await templatesResponse.json();
       
-      const tcbTemplate = templates.find((t: any) => t.name.toLowerCase() === 'tcb');
+      interface Template {
+        id: string;
+        name: string;
+        template_text?: string;
+        storage_path?: string;
+      }
+      
+      const tcbTemplate = templates.find((t: Template) => t.name.toLowerCase() === 'tcb');
       if (!tcbTemplate) {
         alert('TCB template not found. Please create a template named "TCB" first.');
         return;
