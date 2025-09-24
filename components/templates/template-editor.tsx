@@ -179,10 +179,13 @@ export function TemplateEditor() {
 
           {/* Help text */}
           <div className="mt-4 p-3 bg-blue-50 rounded-md">
-            <p className="text-sm text-blue-800">
-              <strong>Tip:</strong> Use <code className="bg-blue-100 px-1 rounded">{"{{parameter.name}}"}</code> syntax for dynamic content. 
-              For example: <code className="bg-blue-100 px-1 rounded">{"{{customer.Name}}"}</code> or <code className="bg-blue-100 px-1 rounded">{"{{project.Title}}"}</code>
+            <p className="text-sm text-blue-800 mb-2">
+              <strong>Available Parameters:</strong>
             </p>
+            <div className="text-xs text-blue-700 space-y-1">
+              <div><strong>Customer:</strong> <code className="bg-blue-100 px-1 rounded">{"{{customer.Name}}"}</code></div>
+              <div><strong>Project:</strong> <code className="bg-blue-100 px-1 rounded">{"{{project.document_no}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.reference_no}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.publication_date}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.closing_date}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.description}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.suppliers_count}}"}</code></div>
+            </div>
           </div>
         </CardContent>
       </Card>

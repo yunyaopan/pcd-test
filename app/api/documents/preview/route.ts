@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
   const { data: project, error: pErr } = await supabase
     .from("projects")
-    .select("id,name,customer_name")
+    .select("id,name,document_no,reference_no,publication_date,closing_date,description,suppliers_count")
     .eq("id", projectId)
     .single();
   if (pErr || !project) return NextResponse.json({ error: pErr?.message || "Project not found" }, { status: 404 });
@@ -71,7 +71,17 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const paramObject = { customer: { Name: project.customer_name } } as Record<string, unknown>;
+  const paramObject = { 
+    customer: { Name: project.name },
+    project: {
+      document_no: project.document_no,
+      reference_no: project.reference_no,
+      publication_date: project.publication_date,
+      closing_date: project.closing_date,
+      description: project.description,
+      suppliers_count: project.suppliers_count
+    }
+  } as Record<string, unknown>;
   const merged = mergeTemplate(templateText, paramObject);
 
   return NextResponse.json({ preview: { templateName: template.name, projectName: project.name, content: merged } });
