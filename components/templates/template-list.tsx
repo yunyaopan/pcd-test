@@ -5,6 +5,8 @@ import { listProjects, previewDocument, ProjectDto } from "@/lib/api/projects";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Plus } from "lucide-react";
+import Link from "next/link";
 
 interface PreviewState {
   templateId: string | null;
@@ -55,9 +57,19 @@ export function TemplateList() {
 
   return (
     <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Templates</h1>
+        <Link href="/protected/templates/new">
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            Create New Template
+          </Button>
+        </Link>
+      </div>
+      
       <Card>
         <CardHeader>
-          <CardTitle>Upload Template</CardTitle>
+          <CardTitle>Upload Template (Legacy)</CardTitle>
         </CardHeader>
         <CardContent>
           <form action={onUploadFormSubmit} className="grid gap-3 md:grid-cols-3">
