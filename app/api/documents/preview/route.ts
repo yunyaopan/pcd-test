@@ -19,16 +19,17 @@ function generateTenderSubmissionsTable(submissions: TenderSubmission[]): string
     return "<p>No tender submissions available.</p>";
   }
 
+  // Sort by percentage adjustment (biggest to smallest)
+  const sortedSubmissions = [...submissions].sort((a, b) => {
+    const aAdjustment = a.percentage_adjustment || 0;
+    const bAdjustment = b.percentage_adjustment || 0;
+    return bAdjustment - aAdjustment; // Descending order (biggest first)
+  });
+
   const tableHeaders = [
-    "Schedule Of Rates No.",
-    "Trading Partner Reference No.",
-    "Supplier Name",
-    "Response No.",
-    "Schedule of Rates Description",
-    "Percentage Adjustment",
-    "Percentage Sign",
-    "Entry Date",
-    "Supplier Remarks"
+    "S/N",
+    "Name of Tenderer", 
+    "Plus (+) / Minus (-) Percentum on Fixed Base Prices in the Fixed Schedule of Rates (%)"
   ];
 
   let tableHtml = `
@@ -41,18 +42,30 @@ function generateTenderSubmissionsTable(submissions: TenderSubmission[]): string
       <tbody>
   `;
 
-  submissions.forEach(submission => {
+  sortedSubmissions.forEach((submission, index) => {
+    // Format percentage with proper sign
+    const percentageAdjustment = submission.percentage_adjustment || 0;
+    const percentageSign = submission.percentage_sign || '';
+    
+    // Convert sign to proper format: "Negative" -> "(-)", "Positive" -> "(+)"
+    let formattedSign = '';
+    if (percentageSign.toLowerCase() === 'negative') {
+      formattedSign = '(-)';
+    } else if (percentageSign.toLowerCase() === 'positive') {
+      formattedSign = '(+)';
+    } else {
+      formattedSign = percentageSign; // Keep original if it's already formatted
+    }
+    
+    const formattedPercentage = percentageAdjustment !== 0 
+      ? `${formattedSign} ${Math.abs(percentageAdjustment)}%`
+      : '0%';
+
     tableHtml += `
       <tr>
-        <td style="border: 1px solid #ddd; padding: 12px;">${submission.schedule_of_rates_no || ''}</td>
-        <td style="border: 1px solid #ddd; padding: 12px;">${submission.trading_partner_reference_no || ''}</td>
+        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">${index + 1}</td>
         <td style="border: 1px solid #ddd; padding: 12px;">${submission.supplier_name || ''}</td>
-        <td style="border: 1px solid #ddd; padding: 12px;">${submission.response_no || ''}</td>
-        <td style="border: 1px solid #ddd; padding: 12px;">${submission.schedule_of_rates_description || ''}</td>
-        <td style="border: 1px solid #ddd; padding: 12px;">${submission.percentage_adjustment || ''}</td>
-        <td style="border: 1px solid #ddd; padding: 12px;">${submission.percentage_sign || ''}</td>
-        <td style="border: 1px solid #ddd; padding: 12px;">${submission.entry_date || ''}</td>
-        <td style="border: 1px solid #ddd; padding: 12px;">${submission.supplier_remarks || ''}</td>
+        <td style="border: 1px solid #ddd; padding: 12px; text-align: center;">${formattedPercentage}</td>
       </tr>
     `;
   });
