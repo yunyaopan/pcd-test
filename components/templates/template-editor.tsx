@@ -246,6 +246,7 @@ export function TemplateEditor() {
               <div><strong>Customer:</strong> <code className="bg-blue-100 px-1 rounded">{"{{customer.Name}}"}</code></div>
               <div><strong>Project:</strong> <code className="bg-blue-100 px-1 rounded">{"{{project.document_no}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.reference_no}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.publication_date}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.closing_date}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.description}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.suppliers_count}}"}</code></div>
               <div><strong>Tender Submissions Table:</strong> <code className="bg-blue-100 px-1 rounded">{"{{tender_submissions_table}}"}</code> - Displays all tender submissions in a formatted table</div>
+              <div><strong>Evaluation Criteria Table:</strong> <code className="bg-blue-100 px-1 rounded">{"{{evaluation_criteria_table}}"}</code> - Displays project evaluation criteria with percentages and scoring details</div>
             </div>
           </div>
         </CardContent>

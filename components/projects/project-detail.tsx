@@ -3,17 +3,34 @@ import { useEffect, useState, useCallback } from "react";
 import { ProjectDto } from "@/lib/api/projects";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, FileText, Users, BarChart3 } from "lucide-react";
+import { ArrowLeft, FileText, Users, BarChart3, FileCheck, X } from "lucide-react";
 import Link from "next/link";
 
 interface ProjectDetailProps {
   projectId: string;
 }
 
+interface PreviewState {
+  templateId: string | null;
+  projectId: string | null;
+  content: string | null;
+  templateName: string | null;
+  projectName: string | null;
+}
+
 export function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [project, setProject] = useState<ProjectDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [preview, setPreview] = useState<PreviewState>({ 
+    templateId: null, 
+    projectId: null, 
+    content: null, 
+    templateName: null, 
+    projectName: null 
+  });
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [isGeneratingTCB, setIsGeneratingTCB] = useState(false);
 
   const loadProject = useCallback(async () => {
     setIsLoading(true);
@@ -35,6 +52,51 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
   useEffect(() => {
     loadProject();
   }, [projectId, loadProject]);
+
+  async function handleCreateTCBPaper() {
+    if (!project) return;
+    
+    setIsGeneratingTCB(true);
+    try {
+      // First, find the TCB template
+      const templatesResponse = await fetch('/api/templates');
+      if (!templatesResponse.ok) throw new Error('Failed to load templates');
+      const { templates } = await templatesResponse.json();
+      
+      const tcbTemplate = templates.find((t: any) => t.name.toLowerCase() === 'tcb');
+      if (!tcbTemplate) {
+        alert('TCB template not found. Please create a template named "TCB" first.');
+        return;
+      }
+
+      // Generate preview using TCB template
+      const response = await fetch('/api/documents/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          templateId: tcbTemplate.id, 
+          projectId: project.id 
+        }),
+      });
+      
+      if (!response.ok) throw new Error('Failed to generate TCB paper');
+      
+      const { preview: pv } = await response.json();
+      setPreview({
+        templateId: tcbTemplate.id,
+        projectId: project.id,
+        content: pv.content,
+        templateName: pv.templateName,
+        projectName: pv.projectName
+      });
+      setShowPreviewModal(true);
+    } catch (error) {
+      console.error('Failed to generate TCB paper:', error);
+      alert('Failed to generate TCB paper. Please try again.');
+    } finally {
+      setIsGeneratingTCB(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -84,6 +146,25 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
               </span>
             </div>
           </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            onClick={handleCreateTCBPaper}
+            disabled={isGeneratingTCB}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            {isGeneratingTCB ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <FileCheck className="w-4 h-4 mr-2" />
+                Create TCB Paper
+              </>
+            )}
+          </Button>
         </div>
       </div>
 
@@ -253,6 +334,39 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
             <p className="text-gray-500">No tender submissions found for this project.</p>
           </CardContent>
         </Card>
+      )}
+
+      {/* TCB Paper Preview Modal */}
+      {showPreviewModal && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b">
+              <div>
+                <h2 className="text-xl font-semibold">TCB Paper Preview</h2>
+                <p className="text-sm text-gray-600">
+                  Template: {preview.templateName} | Project: {preview.projectName}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowPreviewModal(false)}
+              >
+                <X className="w-4 h-4 mr-2" />
+                Close
+              </Button>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="flex-1 overflow-auto p-6">
+              <div 
+                className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl max-w-none"
+                dangerouslySetInnerHTML={{ __html: preview.content || '' }}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

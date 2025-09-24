@@ -14,6 +14,57 @@ interface TenderSubmission {
   supplier_remarks: string | null;
 }
 
+function generateEvaluationCriteriaTable(evaluationApproach: any): string {
+  if (!evaluationApproach) {
+    return "<p>No evaluation criteria available.</p>";
+  }
+
+  const tableHtml = `
+    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-family: Arial, sans-serif;">
+      <thead>
+        <tr style="background-color: #f5f5f5;">
+          <th style="border: 1px solid #ddd; padding: 12px; text-align: left; font-weight: bold;">Criteria</th>
+          <th style="border: 1px solid #ddd; padding: 12px; text-align: left; font-weight: bold;">Percentage</th>
+          <th style="border: 1px solid #ddd; padding: 12px; text-align: left; font-weight: bold;">Scoring Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold; color: #059669;">Price</td>
+          <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold; color: #059669;">${evaluationApproach.price_percentage}%</td>
+          <td style="border: 1px solid #ddd; padding: 12px; color: #6b7280;">Price-based evaluation</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold; color: #dc2626;">Safety</td>
+          <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold; color: #dc2626;">${evaluationApproach.safety_percentage}%</td>
+          <td style="border: 1px solid #ddd; padding: 12px; color: #6b7280;">Safety compliance evaluation</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold; color: #2563eb;">Technical</td>
+          <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold; color: #2563eb;">${evaluationApproach.technical_percentage}%</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">
+            ${evaluationApproach.technical_criteria ? 
+              Object.entries(evaluationApproach.technical_criteria).map(([points, description]) => 
+                `<div style="margin: 4px 0;"><strong style="color: #2563eb;">${points}:</strong> ${description}</div>`
+              ).join('') : 
+              '<span style="color: #6b7280;">Technical proposal evaluation</span>'
+            }
+          </td>
+        </tr>
+        <tr style="background-color: #f9fafb;">
+          <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold;">Total</td>
+          <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold;">
+            ${evaluationApproach.price_percentage + evaluationApproach.safety_percentage + evaluationApproach.technical_percentage}%
+          </td>
+          <td style="border: 1px solid #ddd; padding: 12px; color: #6b7280;">Complete evaluation criteria</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+
+  return tableHtml;
+}
+
 function generateTenderSubmissionsTable(submissions: TenderSubmission[]): string {
   if (!submissions || submissions.length === 0) {
     return "<p>No tender submissions available.</p>";
@@ -116,6 +167,7 @@ export async function POST(req: NextRequest) {
       closing_date,
       description,
       suppliers_count,
+      evaluation_approach_id,
       tender_submissions (
         id,
         schedule_of_rates_no,
@@ -127,6 +179,14 @@ export async function POST(req: NextRequest) {
         percentage_sign,
         entry_date,
         supplier_remarks
+      ),
+      evaluation_approaches (
+        id,
+        name,
+        price_percentage,
+        safety_percentage,
+        technical_percentage,
+        technical_criteria
       )
     `)
     .eq("id", projectId)
@@ -178,7 +238,8 @@ export async function POST(req: NextRequest) {
       description: project.description,
       suppliers_count: project.suppliers_count
     },
-    tender_submissions_table: generateTenderSubmissionsTable(project.tender_submissions || [])
+    tender_submissions_table: generateTenderSubmissionsTable(project.tender_submissions || []),
+    evaluation_criteria_table: generateEvaluationCriteriaTable(project.evaluation_approaches)
   } as Record<string, unknown>;
   const merged = mergeTemplate(templateText, paramObject);
 
