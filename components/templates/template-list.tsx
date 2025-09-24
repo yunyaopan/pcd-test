@@ -1,11 +1,10 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { listTemplates, uploadTemplate, TemplateDto } from "@/lib/api/templates";
+import { listTemplates, TemplateDto } from "@/lib/api/templates";
 import { listProjects, previewDocument, ProjectDto } from "@/lib/api/projects";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 interface PreviewState {
@@ -20,6 +19,7 @@ export function TemplateList() {
   const [templates, setTemplates] = useState<TemplateDto[]>([]);
   const [projects, setProjects] = useState<ProjectDto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewState>({ 
     templateId: null, 
     projectId: null, 
@@ -31,23 +31,16 @@ export function TemplateList() {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   useEffect(() => {
-    Promise.all([listTemplates(), listProjects()]).then(([t, p]) => {
-      setTemplates(t);
-      setProjects(p);
-    });
+    loadData();
   }, []);
 
-  async function onUploadFormSubmit(formData: FormData) {
-    setIsLoading(true);
+  async function loadData() {
     try {
-      const name = String(formData.get("name") || "");
-      const file = (formData.get("file") as File) || undefined;
-      const templateText = String(formData.get("template_text") || "");
-      await uploadTemplate({ name, file, template_text: templateText || undefined });
-      const t = await listTemplates();
+      const [t, p] = await Promise.all([listTemplates(), listProjects()]);
       setTemplates(t);
-    } finally {
-      setIsLoading(false);
+      setProjects(p);
+    } catch (error) {
+      console.error("Failed to load data:", error);
     }
   }
 
@@ -75,6 +68,30 @@ export function TemplateList() {
     }); // Clear previous preview
   }
 
+  async function handleDeleteTemplate(templateId: string) {
+    if (!confirm("Are you sure you want to delete this template? This action cannot be undone.")) {
+      return;
+    }
+
+    setIsDeleting(templateId);
+    try {
+      const response = await fetch(`/api/templates/${templateId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete template');
+      }
+      
+      await loadData(); // Refresh the list
+    } catch (error) {
+      console.error("Failed to delete template:", error);
+      alert("Failed to delete template. Please try again.");
+    } finally {
+      setIsDeleting(null);
+    }
+  }
+
   const projectOptions = useMemo(() => projects.map(p => ({ id: p.id, name: p.name })), [projects]);
 
   return (
@@ -88,22 +105,6 @@ export function TemplateList() {
           </Button>
         </Link>
       </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Upload Template (Legacy)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form action={onUploadFormSubmit} className="grid gap-3 md:grid-cols-3">
-            <Input name="name" placeholder="Template name" required />
-            <Input name="file" type="file" accept=".doc,.docx,.txt" />
-            <Input name="template_text" placeholder="Or paste template text like: Hello {{customer.Name}}" />
-            <div className="md:col-span-3">
-              <Button type="submit" disabled={isLoading}>{isLoading ? "Uploading…" : "Save Template"}</Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
 
       <div className="grid gap-4 md:grid-cols-2">
         {templates.map(t => (
@@ -128,12 +129,31 @@ export function TemplateList() {
                       ))}
                     </select>
                   ) : (
-                    <Button 
-                      variant="secondary" 
-                      onClick={() => handleNewDocClick(t.id)}
-                    >
-                      New doc
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="secondary" 
+                        onClick={() => handleNewDocClick(t.id)}
+                      >
+                        New doc
+                      </Button>
+                      <Link href={`/protected/templates/${t.id}/edit`}>
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleDeleteTemplate(t.id)}
+                        disabled={isDeleting === t.id}
+                      >
+                        {isDeleting === t.id ? (
+                          <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
                   )}
                 </div>
               </CardTitle>

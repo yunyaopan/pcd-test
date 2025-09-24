@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { uploadTemplate } from "@/lib/api/templates";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import {
   Bold,
   Italic,
@@ -22,8 +22,14 @@ import {
 
 export function TemplateEditor() {
   const router = useRouter();
+  const params = useParams();
+  const templateId = params?.id as string;
+  const isEditing = !!templateId;
+  
   const [templateName, setTemplateName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(isEditing);
+  const [templateContent, setTemplateContent] = useState<string>("");
 
   const editor = useEditor({
     extensions: [
@@ -42,6 +48,39 @@ export function TemplateEditor() {
     },
   });
 
+  // Load existing template data when editing
+  useEffect(() => {
+    if (isEditing && templateId) {
+      loadTemplateData();
+    }
+  }, [isEditing, templateId]);
+
+  // Set content when editor is ready and we have template data
+  useEffect(() => {
+    if (editor && templateContent) {
+      editor.commands.setContent(templateContent);
+    }
+  }, [editor, templateContent]);
+
+  async function loadTemplateData() {
+    try {
+      const response = await fetch(`/api/templates/${templateId}`);
+      if (!response.ok) throw new Error('Failed to load template');
+      
+      const { template } = await response.json();
+      setTemplateName(template.name);
+      
+      if (template.template_text) {
+        setTemplateContent(template.template_text);
+      }
+    } catch (error) {
+      console.error('Failed to load template:', error);
+      alert('Failed to load template data');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   const handleSave = async () => {
     if (!templateName.trim()) {
       alert("Please enter a template name");
@@ -56,10 +95,31 @@ export function TemplateEditor() {
     setIsSaving(true);
     try {
       const htmlContent = editor?.getHTML() || "";
-      await uploadTemplate({
-        name: templateName,
-        template_text: htmlContent,
-      });
+      
+      if (isEditing) {
+        // Update existing template
+        const response = await fetch(`/api/templates/${templateId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: templateName,
+            template_text: htmlContent,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update template');
+        }
+      } else {
+        // Create new template
+        await uploadTemplate({
+          name: templateName,
+          template_text: htmlContent,
+        });
+      }
+      
       router.push("/protected/templates");
     } catch (error) {
       console.error("Failed to save template:", error);
@@ -112,9 +172,9 @@ export function TemplateEditor() {
                 className="max-w-md"
               />
             </div>
-            <Button onClick={handleSave} disabled={isSaving}>
+            <Button onClick={handleSave} disabled={isSaving || isLoading}>
               <Save className="w-4 h-4 mr-2" />
-              {isSaving ? "Saving..." : "Save Template"}
+              {isSaving ? "Saving..." : isLoading ? "Loading..." : isEditing ? "Update Template" : "Save Template"}
             </Button>
           </CardTitle>
         </CardHeader>
