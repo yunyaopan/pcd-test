@@ -45,7 +45,7 @@ export function ExcelUploadModal({ onClose, onProjectCreated }: ExcelUploadModal
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
       // Extract data based on the Excel structure
-      const extracted = extractProjectData(jsonData);
+      const extracted = extractProjectData(jsonData as unknown[][]);
       setExtractedData(extracted);
       setStep('confirm');
     } catch (error) {
