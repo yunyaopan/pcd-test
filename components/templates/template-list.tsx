@@ -18,7 +18,6 @@ interface PreviewState {
 export function TemplateList() {
   const [templates, setTemplates] = useState<TemplateDto[]>([]);
   const [projects, setProjects] = useState<ProjectDto[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewState>({ 
     templateId: null, 

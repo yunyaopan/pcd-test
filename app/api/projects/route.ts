@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+interface TenderSubmissionInput {
+  scheduleOfRatesNo: string;
+  tradingPartnerReferenceNo: string;
+  supplierName: string;
+  responseNo: string;
+  scheduleOfRatesDescription: string;
+  percentageAdjustment: number;
+  percentageSign: string;
+  entryDate: string;
+  supplierRemarks: string;
+}
+
 export async function GET() {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -72,7 +84,7 @@ export async function POST(req: NextRequest) {
 
   // Then, create tender submissions if any
   if (tender_submissions && tender_submissions.length > 0) {
-    const submissionsData = tender_submissions.map(submission => ({
+    const submissionsData = tender_submissions.map((submission: TenderSubmissionInput) => ({
       project_id: project.id,
       schedule_of_rates_no: submission.scheduleOfRatesNo,
       trading_partner_reference_no: submission.tradingPartnerReferenceNo,

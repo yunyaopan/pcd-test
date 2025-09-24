@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { uploadTemplate } from "@/lib/api/templates";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
   Bold,
@@ -48,21 +48,7 @@ export function TemplateEditor() {
     },
   });
 
-  // Load existing template data when editing
-  useEffect(() => {
-    if (isEditing && templateId) {
-      loadTemplateData();
-    }
-  }, [isEditing, templateId]);
-
-  // Set content when editor is ready and we have template data
-  useEffect(() => {
-    if (editor && templateContent) {
-      editor.commands.setContent(templateContent);
-    }
-  }, [editor, templateContent]);
-
-  async function loadTemplateData() {
+  const loadTemplateData = useCallback(async () => {
     try {
       const response = await fetch(`/api/templates/${templateId}`);
       if (!response.ok) throw new Error('Failed to load template');
@@ -79,7 +65,21 @@ export function TemplateEditor() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [templateId]);
+
+  // Load existing template data when editing
+  useEffect(() => {
+    if (isEditing && templateId) {
+      loadTemplateData();
+    }
+  }, [isEditing, templateId, loadTemplateData]);
+
+  // Set content when editor is ready and we have template data
+  useEffect(() => {
+    if (editor && templateContent) {
+      editor.commands.setContent(templateContent);
+    }
+  }, [editor, templateContent]);
 
   const handleSave = async () => {
     if (!templateName.trim()) {
