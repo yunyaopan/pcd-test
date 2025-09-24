@@ -20,6 +20,7 @@ export interface ProjectDto {
   closing_date: string | null;
   description: string | null;
   suppliers_count: number | null;
+  status: string | null;
   tender_submissions: TenderSubmission[] | null;
   created_at: string;
 }

@@ -26,6 +26,7 @@ export async function GET() {
       closing_date,
       description,
       suppliers_count,
+      status,
       created_at,
       tender_submissions (
         id,
@@ -58,6 +59,7 @@ export async function POST(req: NextRequest) {
     closing_date,
     description,
     suppliers_count,
+    status,
     tender_submissions
   } = body;
 
@@ -76,8 +78,9 @@ export async function POST(req: NextRequest) {
       closing_date,
       description,
       suppliers_count: suppliers_count || 0,
+      status: status || 'submit evaluation criteria',
     })
-    .select("id,name,document_no,reference_no,publication_date,closing_date,description,suppliers_count,created_at")
+    .select("id,name,document_no,reference_no,publication_date,closing_date,description,suppliers_count,status,created_at")
     .single();
 
   if (projectError) return NextResponse.json({ error: projectError.message }, { status: 500 });

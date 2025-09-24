@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { listProjects, ProjectDto } from "@/lib/api/projects";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import { ExcelUploadModal } from "./excel-upload-modal";
 
@@ -45,37 +44,22 @@ export function ProjectList() {
       {isLoading ? (
         <div>Loading projects...</div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-2">
           {projects.map(project => (
-            <Card key={project.id}>
-              <CardHeader>
-                <CardTitle className="text-lg">{project.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="font-medium">Document No.:</span> {project.document_no || 'N/A'}
-                  </div>
-                  <div>
-                    <span className="font-medium">Publication Date:</span> {project.publication_date || 'N/A'}
-                  </div>
-                  <div>
-                    <span className="font-medium">Closing Date:</span> {project.closing_date || 'N/A'}
-                  </div>
-                  <div>
-                    <span className="font-medium">Description:</span> {project.description || 'N/A'}
-                  </div>
-                  <div>
-                    <span className="font-medium">Suppliers:</span> {project.suppliers_count || 'N/A'}
-                  </div>
-                  {project.tender_submissions && project.tender_submissions.length > 0 && (
-                    <div>
-                      <span className="font-medium">Tender Submissions:</span> {project.tender_submissions.length}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <div key={project.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex-1">
+                <h3 className="text-lg font-medium">{project.name}</h3>
+              </div>
+              <div className="flex items-center space-x-4">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  project.status === 'submit evaluation criteria' 
+                    ? 'bg-blue-100 text-blue-800' 
+                    : 'bg-green-100 text-green-800'
+                }`}>
+                  {project.status || 'submit evaluation criteria'}
+                </span>
+              </div>
+            </div>
           ))}
         </div>
       )}

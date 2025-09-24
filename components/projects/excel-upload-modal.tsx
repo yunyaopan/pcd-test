@@ -183,6 +183,7 @@ export function ExcelUploadModal({ onClose, onProjectCreated }: ExcelUploadModal
           closing_date: extractedData.closingDate,
           description: extractedData.description,
           suppliers_count: extractedData.suppliersCount,
+          status: 'submit evaluation criteria', // Default status for new projects
           tender_submissions: extractedData.tenderSubmissions,
         }),
       });
