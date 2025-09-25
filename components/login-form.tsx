@@ -38,8 +38,8 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      // Redirect to homepage after successful login
-      router.push("/");
+      // Redirect to templates page after successful login
+      router.push("/protected/templates");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
