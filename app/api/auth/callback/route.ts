@@ -1,9 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-export async function POST() {
-  // Pass request/response to Supabase so it can manage cookies
-  const response = NextResponse.next();
+export async function POST(request: NextRequest) {
+  const response = NextResponse.json({ success: true });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,7 +10,7 @@ export async function POST() {
     {
       cookies: {
         getAll() {
-          return []; // middleware will handle initial cookies
+          return request.cookies.getAll();
         },
         setAll(cookies) {
           cookies.forEach(({ name, value, options }) => {
