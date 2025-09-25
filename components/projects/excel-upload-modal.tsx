@@ -47,6 +47,40 @@ export function ExcelUploadModal({ onClose, onProjectCreated, projectId }: Excel
     }
   }
 
+  async function handleDownloadSample() {
+    try {
+      // Import Supabase client
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      
+      // Download file from Supabase storage
+      const { data, error } = await supabase.storage
+        .from('test file')
+        .download('gebiz_sanitized.xlsx');
+      
+      if (error) {
+        console.error('Error downloading file:', error);
+        alert('Failed to download sample file. Please try again.');
+        return;
+      }
+      
+      if (data) {
+        // Create download link
+        const url = window.URL.createObjectURL(data);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'gebiz_sanitized.xlsx';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Error downloading sample file:', error);
+      alert('Failed to download sample file. Please try again.');
+    }
+  }
+
   async function handleExtractData() {
     if (!file) return;
 
@@ -65,6 +99,45 @@ export function ExcelUploadModal({ onClose, onProjectCreated, projectId }: Excel
     } catch (error) {
       console.error('Error processing Excel file:', error);
       alert('Failed to process Excel file. Please ensure it\'s a valid Excel file.');
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  async function handleExtractDataFromSample() {
+    setIsProcessing(true);
+    try {
+      // Import Supabase client
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      
+      // Download file from Supabase storage
+      const { data, error } = await supabase.storage
+        .from('test file')
+        .download('gebiz_sanitized.xlsx');
+      
+      if (error) {
+        console.error('Error downloading sample file:', error);
+        alert('Failed to download sample file. Please try again.');
+        return;
+      }
+      
+      if (data) {
+        // Process the downloaded file
+        const arrayBuffer = await data.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Extract data based on the Excel structure
+        const extracted = extractProjectData(jsonData as unknown[][]);
+        setExtractedData(extracted);
+        setStep('confirm');
+      }
+    } catch (error) {
+      console.error('Error processing sample file:', error);
+      alert('Failed to process sample file. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -281,6 +354,38 @@ export function ExcelUploadModal({ onClose, onProjectCreated, projectId }: Excel
                 >
                   <Upload className="w-4 h-4 mr-2" />
                   {isProcessing ? 'Processing...' : 'Extract Data'}
+                </Button>
+              </div>
+
+              {/* Separating line and alternative option */}
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-white px-2 text-gray-500">or</span>
+                </div>
+              </div>
+
+              <div className="text-center text-sm text-gray-600 mb-4">
+                Alternatively, try to upload this{" "}
+                <button
+                  onClick={handleDownloadSample}
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  example gebiz file
+                </button>{" "}
+                to proceed with data extraction.
+              </div>
+
+              <div className="flex justify-center">
+                <Button
+                  onClick={handleExtractDataFromSample}
+                  disabled={isProcessing}
+                  variant="outline"
+                  className="w-full"
+                >
+                  Extract Data from Sample GEBiz File
                 </Button>
               </div>
             </div>
