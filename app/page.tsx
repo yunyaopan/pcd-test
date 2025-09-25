@@ -1,6 +1,4 @@
-import { AuthButton } from "@/components/auth-button";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { hasEnvVars } from "@/lib/utils";
+import { Navigation } from "@/components/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,16 +8,7 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="flex-1 w-full flex flex-col gap-20 items-center">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16 bg-white/80 backdrop-blur-sm">
-          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/"} className="text-xl font-bold text-indigo-600">
-                AI-Assisted Procurement
-              </Link>
-            </div>
-            {!hasEnvVars ? null : <AuthButton />}
-          </div>
-        </nav>
+        <Navigation />
         
         <div className="flex-1 flex flex-col gap-12 max-w-6xl p-8 w-full">
           {/* Hero Section */}
@@ -136,7 +125,6 @@ export default function Home() {
               Supabase
             </a>
           </p>
-          <ThemeSwitcher />
         </footer>
       </div>
     </main>
