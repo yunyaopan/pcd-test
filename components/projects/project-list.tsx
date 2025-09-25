@@ -2,9 +2,9 @@
 import { useEffect, useState } from "react";
 import { listProjects, ProjectDto } from "@/lib/api/projects";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Eye } from "lucide-react";
+import { Plus } from "lucide-react";
 import { EvaluationApproachModal } from "./evaluation-approach-modal";
 import Link from "next/link";
 
