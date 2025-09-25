@@ -9,6 +9,7 @@ import Link from "next/link";
 
 export function TemplateList() {
   const [templates, setTemplates] = useState<TemplateDto[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   useEffect(() => {
@@ -16,11 +17,14 @@ export function TemplateList() {
   }, []);
 
   async function loadTemplates() {
+    setIsLoading(true);
     try {
       const templates = await listTemplates();
       setTemplates(templates);
     } catch (error) {
       console.error("Failed to load templates:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -60,52 +64,56 @@ export function TemplateList() {
         </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {templates.map(t => (
-          <Link key={t.id} href={`/protected/templates/${t.id}/edit`} className="block">
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="truncate">{t.name}</span>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      Template
-                    </Badge>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleDeleteTemplate(t.id);
-                      }}
-                      disabled={isDeleting === t.id}
-                    >
-                      {isDeleting === t.id ? (
-                        <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-                      ) : (
-                        <Trash2 className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600">
-                  Created: {new Date(t.created_at).toLocaleDateString()}
-                </p>
-                {t.storage_path && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Has file attachment
+      {isLoading ? (
+        <div className="text-center py-8 text-gray-500">Loading templates...</div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {templates.map(t => (
+            <Link key={t.id} href={`/protected/templates/${t.id}/edit`} className="block">
+              <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="truncate">{t.name}</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs">
+                        Template
+                      </Badge>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDeleteTemplate(t.id);
+                        }}
+                        disabled={isDeleting === t.id}
+                      >
+                        {isDeleting === t.id ? (
+                          <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">
+                    Created: {new Date(t.created_at).toLocaleDateString()}
                   </p>
-                )}
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
+                  {t.storage_path && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Has file attachment
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
 
-      {templates.length === 0 && (
+      {templates.length === 0 && !isLoading && (
         <div className="text-center py-8 text-gray-500">
           No templates found. Create your first template to get started.
         </div>

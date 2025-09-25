@@ -45,24 +45,24 @@ function generateEvaluationCriteriaTable(evaluationApproach: EvaluationApproach 
       </thead>
       <tbody>
         <tr>
-          <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold; color: #059669;">Price</td>
-          <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold; color: #059669;">${evaluationApproach.price_percentage}%</td>
+          <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold;">Price</td>
+          <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold;">${evaluationApproach.price_percentage}%</td>
           <td style="border: 1px solid #ddd; padding: 12px; color: #6b7280;">Price-based evaluation</td>
           ${tenderSubmissions.map(() => '<td style="border: 1px solid #ddd; padding: 12px; text-align: center; color: #9ca3af;">-</td>').join('')}
         </tr>
         <tr>
-          <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold; color: #dc2626;">Safety</td>
-          <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold; color: #dc2626;">${evaluationApproach.safety_percentage}%</td>
+          <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold;">Safety</td>
+          <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold;">${evaluationApproach.safety_percentage}%</td>
           <td style="border: 1px solid #ddd; padding: 12px; color: #6b7280;">Safety compliance evaluation</td>
           ${tenderSubmissions.map(() => '<td style="border: 1px solid #ddd; padding: 12px; text-align: center; color: #9ca3af;">-</td>').join('')}
         </tr>
         <tr>
-          <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold; color: #2563eb;">Technical</td>
-          <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold; color: #2563eb;">${evaluationApproach.technical_percentage}%</td>
+          <td style="border: 1px solid #ddd; padding: 12px; font-weight: bold;">Technical</td>
+          <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-weight: bold;">${evaluationApproach.technical_percentage}%</td>
           <td style="border: 1px solid #ddd; padding: 12px;">
             ${evaluationApproach.technical_criteria ? 
               Object.entries(evaluationApproach.technical_criteria).map(([points, description]) => 
-                `<div style="margin: 4px 0;"><strong style="color: #2563eb;">${points}:</strong> ${description}</div>`
+                `<div style="margin: 4px 0;"><strong>${points}:</strong> ${description}</div>`
               ).join('') : 
               '<span style="color: #6b7280;">Technical proposal evaluation</span>'
             }
