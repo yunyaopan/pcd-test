@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { listProjects, ProjectDto } from "@/lib/api/projects";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Plus, Eye } from "lucide-react";
 import { EvaluationApproachModal } from "./evaluation-approach-modal";
 import Link from "next/link";
@@ -43,30 +45,31 @@ export function ProjectList() {
       </div>
 
       {isLoading ? (
-        <div>Loading projects...</div>
+        <div className="text-center py-8 text-gray-500">Loading projects...</div>
       ) : (
-        <div className="space-y-2">
+        <div className="grid gap-4 md:grid-cols-2">
           {projects.map(project => (
-            <div key={project.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-              <div className="flex-1">
-                <h3 className="text-lg font-medium">{project.name}</h3>
-              </div>
-              <div className="flex items-center space-x-4">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  project.status === 'submit evaluation criteria' 
-                    ? 'bg-blue-100 text-blue-800' 
-                    : 'bg-green-100 text-green-800'
-                }`}>
-                  {project.status || 'submit evaluation criteria'}
-                </span>
-                <Link href={`/protected/projects/${project.id}`}>
-                  <Button variant="outline" size="sm">
-                    <Eye className="w-4 h-4 mr-2" />
-                    View Details
-                  </Button>
-                </Link>
-              </div>
-            </div>
+            <Link key={project.id} href={`/protected/projects/${project.id}`} className="block">
+              <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="truncate">{project.name}</span>
+                    <div className="flex items-center gap-2">
+                      <Badge 
+                        variant={project.status === 'submit evaluation criteria' ? 'secondary' : 'default'}
+                        className={
+                          project.status === 'submit evaluation criteria' 
+                            ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' 
+                            : 'bg-green-100 text-green-800 hover:bg-green-200'
+                        }
+                      >
+                        {project.status || 'submit evaluation criteria'}
+                      </Badge>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+            </Link>
           ))}
         </div>
       )}

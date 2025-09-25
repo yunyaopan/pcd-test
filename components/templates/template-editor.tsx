@@ -31,6 +31,19 @@ export function TemplateEditor() {
   const [isLoading, setIsLoading] = useState(isEditing);
   const [templateContent, setTemplateContent] = useState<string>("");
 
+  // Generate default template name
+  const generateDefaultName = () => {
+    const now = new Date();
+    const timestamp = now.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    return `Template ${timestamp}`;
+  };
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -66,6 +79,13 @@ export function TemplateEditor() {
       setIsLoading(false);
     }
   }, [templateId]);
+
+  // Set default name for new templates
+  useEffect(() => {
+    if (!isEditing && !templateName) {
+      setTemplateName(generateDefaultName());
+    }
+  }, [isEditing, templateName]);
 
   // Load existing template data when editing
   useEffect(() => {
@@ -166,7 +186,7 @@ export function TemplateEditor() {
                 Back to Templates
               </Button>
               <Input
-                placeholder="Template name"
+                placeholder="Enter template name"
                 value={templateName}
                 onChange={(e) => setTemplateName(e.target.value)}
                 className="max-w-md"
@@ -243,10 +263,9 @@ export function TemplateEditor() {
               <strong>Available Parameters:</strong>
             </p>
             <div className="text-xs text-blue-700 space-y-1">
-              <div><strong>Customer:</strong> <code className="bg-blue-100 px-1 rounded">{"{{customer.Name}}"}</code></div>
               <div><strong>Project:</strong> <code className="bg-blue-100 px-1 rounded">{"{{project.document_no}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.reference_no}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.publication_date}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.closing_date}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.description}}"}</code>, <code className="bg-blue-100 px-1 rounded">{"{{project.suppliers_count}}"}</code></div>
               <div><strong>Tender Submissions Table:</strong> <code className="bg-blue-100 px-1 rounded">{"{{tender_submissions_table}}"}</code> - Displays all tender submissions in a formatted table</div>
-              <div><strong>Evaluation Criteria Table:</strong> <code className="bg-blue-100 px-1 rounded">{"{{evaluation_criteria_table}}"}</code> - Displays project evaluation criteria with percentages and scoring details</div>
+              <div><strong>Evaluation Criteria Table:</strong> <code className="bg-blue-100 px-1 rounded">{"{{evaluation_criteria_table}}"}</code> - Displays project evaluation criteria with percentages, scoring details and auto scoring for each tender submission</div>
             </div>
           </div>
         </CardContent>
