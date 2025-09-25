@@ -38,11 +38,14 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      // Redirect to templates page after successful login
-      router.push("/protected/templates");
+      
+      // Wait a moment for the auth state to update, then redirect
+      setTimeout(() => {
+        router.push("/protected/templates");
+        setIsLoading(false);
+      }, 100);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
-    } finally {
       setIsLoading(false);
     }
   };

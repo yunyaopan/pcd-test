@@ -49,9 +49,9 @@ export function SignUpForm({
       });
       if (error) throw error;
       router.push("/auth/sign-up-success");
+      setIsLoading(false);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
-    } finally {
       setIsLoading(false);
     }
   };
