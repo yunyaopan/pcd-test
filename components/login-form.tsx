@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export function LoginForm({
   className,
@@ -26,47 +26,35 @@ export function LoginForm({
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const supabase = createClient();
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        console.log('Auth state changed to signed in, redirecting...');
-        setIsLoading(false);
-        router.push("/protected/templates");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [router]);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
+
+    const supabase = createClient();
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      
       if (error) throw error;
-      // Don't redirect here - let the auth state listener handle it
-      
+
+      // 🔑 Sync session cookies server-side
+      console.log('Login successful, syncing session cookies...');
+      await fetch("/api/auth/callback", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      console.log('Session synced, redirecting to templates page...');
+      router.push("/protected/templates");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
       setIsLoading(false);
     }
   };
-
-  // Reset loading state when component unmounts or when redirect happens
-  useEffect(() => {
-    return () => {
-      setIsLoading(false);
-    };
-  }, []);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>

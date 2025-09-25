@@ -9,12 +9,22 @@ export function LogoutButton() {
 
   const logout = async () => {
     const supabase = createClient();
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Logout error:', error);
-    } else {
-      console.log('Successfully logged out');
+    
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      // 🔑 Sync session cookies server-side (clear them)
+      console.log('Logout successful, syncing session cookies...');
+      await fetch("/api/auth/callback", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      console.log('Session cleared, redirecting to login page...');
       router.push("/auth/login");
+    } catch (error) {
+      console.error('Logout error:', error);
     }
   };
 
