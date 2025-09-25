@@ -132,18 +132,20 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="space-y-4">
+        {/* Back button and project info */}
         <div className="flex items-center space-x-4">
           <Link href="/protected/projects">
             <Button variant="outline" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Projects
+              <span className="hidden sm:inline">Back to Projects</span>
+              <span className="sm:hidden">Back</span>
             </Button>
           </Link>
-          <div>
-            <h1 className="text-2xl font-semibold">{project.name}</h1>
-            <div className="flex items-center space-x-4 mt-2">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl font-semibold truncate">{project.name}</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 mt-2">
+              <span className={`px-3 py-1 rounded-full text-sm font-medium w-fit ${
                 project.status === 'submit evaluation criteria' 
                   ? 'bg-blue-100 text-blue-800' 
                   : 'bg-green-100 text-green-800'
@@ -156,28 +158,34 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
             </div>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
+
+        {/* Action buttons - mobile optimized */}
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <Button
             variant="outline"
             onClick={() => setShowExcelUploadModal(true)}
+            className="flex-1 sm:flex-none"
           >
             <Upload className="w-4 h-4 mr-2" />
-            Upload Gebiz Excel
+            <span className="hidden sm:inline">Upload Gebiz Excel</span>
+            <span className="sm:hidden">Upload Excel</span>
           </Button>
           <Button
             onClick={handleCreateTCBPaper}
             disabled={isGeneratingTCB}
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-green-600 hover:bg-green-700 flex-1 sm:flex-none"
           >
             {isGeneratingTCB ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Generating...
+                <span className="hidden sm:inline">Generating...</span>
+                <span className="sm:hidden">Generating</span>
               </>
             ) : (
               <>
                 <FileCheck className="w-4 h-4 mr-2" />
-                Create TCB Paper
+                <span className="hidden sm:inline">Create TCB Paper</span>
+                <span className="sm:hidden">Create TCB</span>
               </>
             )}
           </Button>
@@ -195,39 +203,39 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-300">
+              <table className="w-full border-collapse border border-gray-300 min-w-[600px]">
                 <thead>
                   <tr className="bg-gray-50">
-                    <th className="border border-gray-300 p-3 text-left font-medium">Criteria</th>
-                    <th className="border border-gray-300 p-3 text-left font-medium">Percentage</th>
-                    <th className="border border-gray-300 p-3 text-left font-medium">Scoring Details</th>
+                    <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Criteria</th>
+                    <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Percentage</th>
+                    <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Scoring Details</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="border border-gray-300 p-3 font-medium text-green-700">Price</td>
-                    <td className="border border-gray-300 p-3 text-center font-bold text-green-600">
+                    <td className="border border-gray-300 p-2 sm:p-3 font-medium text-green-700">Price</td>
+                    <td className="border border-gray-300 p-2 sm:p-3 text-center font-bold text-green-600">
                       {project.evaluation_approaches.price_percentage}%
                     </td>
-                    <td className="border border-gray-300 p-3">
+                    <td className="border border-gray-300 p-2 sm:p-3">
                       <span className="text-gray-500">Price-based evaluation</span>
                     </td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-300 p-3 font-medium text-red-700">Safety</td>
-                    <td className="border border-gray-300 p-3 text-center font-bold text-red-600">
+                    <td className="border border-gray-300 p-2 sm:p-3 font-medium text-red-700">Safety</td>
+                    <td className="border border-gray-300 p-2 sm:p-3 text-center font-bold text-red-600">
                       {project.evaluation_approaches.safety_percentage}%
                     </td>
-                    <td className="border border-gray-300 p-3">
+                    <td className="border border-gray-300 p-2 sm:p-3">
                       <span className="text-gray-500">Safety compliance evaluation</span>
                     </td>
                   </tr>
                   <tr>
-                    <td className="border border-gray-300 p-3 font-medium text-blue-700">Technical</td>
-                    <td className="border border-gray-300 p-3 text-center font-bold text-blue-600">
+                    <td className="border border-gray-300 p-2 sm:p-3 font-medium text-blue-700">Technical</td>
+                    <td className="border border-gray-300 p-2 sm:p-3 text-center font-bold text-blue-600">
                       {project.evaluation_approaches.technical_percentage}%
                     </td>
-                    <td className="border border-gray-300 p-3">
+                    <td className="border border-gray-300 p-2 sm:p-3">
                       {project.evaluation_approaches.technical_criteria ? (
                         <ul className="list-disc list-inside space-y-1 text-sm">
                           {Object.entries(project.evaluation_approaches.technical_criteria).map(([points, description]) => (
@@ -243,13 +251,13 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
                     </td>
                   </tr>
                   <tr className="bg-gray-50">
-                    <td className="border border-gray-300 p-3 font-bold">Total</td>
-                    <td className="border border-gray-300 p-3 text-center font-bold">
+                    <td className="border border-gray-300 p-2 sm:p-3 font-bold">Total</td>
+                    <td className="border border-gray-300 p-2 sm:p-3 text-center font-bold">
                       {project.evaluation_approaches.price_percentage + 
                        project.evaluation_approaches.safety_percentage + 
                        project.evaluation_approaches.technical_percentage}%
                     </td>
-                    <td className="border border-gray-300 p-3">
+                    <td className="border border-gray-300 p-2 sm:p-3">
                       <span className="text-gray-500">Complete evaluation criteria</span>
                     </td>
                   </tr>
@@ -271,19 +279,19 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
         <CardContent className="space-y-6">
           {/* Project Information Section */}
           <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-3">
                 <div>
                   <label className="text-sm font-medium text-gray-500">Document No.</label>
-                  <p className="text-sm">{project.document_no || 'N/A'}</p>
+                  <p className="text-sm break-words">{project.document_no || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Reference No.</label>
-                  <p className="text-sm">{project.reference_no || 'N/A'}</p>
+                  <p className="text-sm break-words">{project.reference_no || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-500">Description</label>
-                  <p className="text-sm">{project.description || 'N/A'}</p>
+                  <p className="text-sm break-words">{project.description || 'N/A'}</p>
                 </div>
               </div>
               <div className="space-y-3">
@@ -312,28 +320,28 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
             
             {project.tender_submissions && project.tender_submissions.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300">
+                <table className="w-full border-collapse border border-gray-300 min-w-[700px]">
                   <thead>
                     <tr className="bg-gray-50">
-                      <th className="border border-gray-300 p-3 text-left font-medium">S/N</th>
-                      <th className="border border-gray-300 p-3 text-left font-medium">Supplier Name</th>
-                      <th className="border border-gray-300 p-3 text-left font-medium">Schedule No.</th>
-                      <th className="border border-gray-300 p-3 text-left font-medium">Response No.</th>
-                      <th className="border border-gray-300 p-3 text-left font-medium">Adjustment</th>
-                      <th className="border border-gray-300 p-3 text-left font-medium">Sign</th>
-                      <th className="border border-gray-300 p-3 text-left font-medium">Entry Date</th>
+                      <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">S/N</th>
+                      <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Supplier Name</th>
+                      <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Schedule No.</th>
+                      <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Response No.</th>
+                      <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Adjustment</th>
+                      <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Sign</th>
+                      <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Entry Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {project.tender_submissions.map((submission, index) => (
                       <tr key={submission.id} className="hover:bg-gray-50">
-                        <td className="border border-gray-300 p-3 text-center">{index + 1}</td>
-                        <td className="border border-gray-300 p-3">{submission.supplier_name}</td>
-                        <td className="border border-gray-300 p-3">{submission.schedule_of_rates_no}</td>
-                        <td className="border border-gray-300 p-3">{submission.response_no}</td>
-                        <td className="border border-gray-300 p-3 text-center">{submission.percentage_adjustment || 'N/A'}</td>
-                        <td className="border border-gray-300 p-3 text-center">{submission.percentage_sign || 'N/A'}</td>
-                        <td className="border border-gray-300 p-3">{submission.entry_date || 'N/A'}</td>
+                        <td className="border border-gray-300 p-2 sm:p-3 text-center">{index + 1}</td>
+                        <td className="border border-gray-300 p-2 sm:p-3">{submission.supplier_name}</td>
+                        <td className="border border-gray-300 p-2 sm:p-3">{submission.schedule_of_rates_no}</td>
+                        <td className="border border-gray-300 p-2 sm:p-3">{submission.response_no}</td>
+                        <td className="border border-gray-300 p-2 sm:p-3 text-center">{submission.percentage_adjustment || 'N/A'}</td>
+                        <td className="border border-gray-300 p-2 sm:p-3 text-center">{submission.percentage_sign || 'N/A'}</td>
+                        <td className="border border-gray-300 p-2 sm:p-3">{submission.entry_date || 'N/A'}</td>
                       </tr>
                     ))}
                   </tbody>
