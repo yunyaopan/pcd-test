@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { hasEnvVars } from "../utils";
+import { error } from "console";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -45,6 +46,11 @@ export async function updateSession(request: NextRequest) {
   // IMPORTANT: If you remove getClaims() and you use server-side rendering
   // with the Supabase client, your users may be randomly logged out.
   const { data: { session } } = await supabase.auth.getSession();
+
+  console.log("[Middleware] Path:", request.nextUrl.pathname);
+  console.log("[Middleware] Cookies:", request.cookies.getAll());
+  console.log("[Middleware] Session:", session);
+
   const user = session?.user;
 
   if (
