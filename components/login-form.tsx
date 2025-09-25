@@ -24,38 +24,21 @@ export function LoginForm({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [pendingRedirect, setPendingRedirect] = useState(false);
   const router = useRouter();
 
-  // Listen for auth state changes and redirect when user is authenticated
   useEffect(() => {
-    if (pendingRedirect) {
-      const supabase = createClient();
-      
-      // Check current session first
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user) {
-          console.log('User already authenticated, redirecting immediately');
-          router.push("/protected/templates");
-          setPendingRedirect(false);
-          setIsLoading(false);
-        }
-      });
+    const supabase = createClient();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        console.log('Auth state changed to signed in, redirecting...');
+        setIsLoading(false);
+        router.push("/protected/templates");
+      }
+    });
 
-      // Listen for auth state changes
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        console.log('Auth state change:', event, session?.user?.email);
-        if (event === 'SIGNED_IN' && session?.user) {
-          console.log('User signed in, redirecting to templates page');
-          router.push("/protected/templates");
-          setPendingRedirect(false);
-          setIsLoading(false);
-        }
-      });
-
-      return () => subscription.unsubscribe();
-    }
-  }, [pendingRedirect, router]);
+    return () => subscription.unsubscribe();
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,15 +51,22 @@ export function LoginForm({
         email,
         password,
       });
-      if (error) throw error;
       
-      // Set flag to start listening for auth state changes
-      setPendingRedirect(true);
+      if (error) throw error;
+      // Don't redirect here - let the auth state listener handle it
+      
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
       setIsLoading(false);
     }
   };
+
+  // Reset loading state when component unmounts or when redirect happens
+  useEffect(() => {
+    return () => {
+      setIsLoading(false);
+    };
+  }, []);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
