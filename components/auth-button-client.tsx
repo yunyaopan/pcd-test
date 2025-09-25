@@ -7,7 +7,7 @@ import { LogoutButton } from "./logout-button";
 import { useEffect, useState } from "react";
 
 export function AuthButtonClient() {
-  const [user, setUser] = useState<{ email: string } | null>(null);
+  const [user, setUser] = useState<{ email: string | undefined } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export function AuthButtonClient() {
 
   return user ? (
     <div className="flex items-center gap-4">
-      Hey, {user.email}!
+      Hey, {user.email || 'User'}!
       <LogoutButton />
     </div>
   ) : (
