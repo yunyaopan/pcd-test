@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function LoginForm({
   className,
@@ -24,7 +24,38 @@ export function LoginForm({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [pendingRedirect, setPendingRedirect] = useState(false);
   const router = useRouter();
+
+  // Listen for auth state changes and redirect when user is authenticated
+  useEffect(() => {
+    if (pendingRedirect) {
+      const supabase = createClient();
+      
+      // Check current session first
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          console.log('User already authenticated, redirecting immediately');
+          router.push("/protected/templates");
+          setPendingRedirect(false);
+          setIsLoading(false);
+        }
+      });
+
+      // Listen for auth state changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        console.log('Auth state change:', event, session?.user?.email);
+        if (event === 'SIGNED_IN' && session?.user) {
+          console.log('User signed in, redirecting to templates page');
+          router.push("/protected/templates");
+          setPendingRedirect(false);
+          setIsLoading(false);
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    }
+  }, [pendingRedirect, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,11 +70,8 @@ export function LoginForm({
       });
       if (error) throw error;
       
-      // Wait a moment for the auth state to update, then redirect
-      setTimeout(() => {
-        router.push("/protected/templates");
-        setIsLoading(false);
-      }, 100);
+      // Set flag to start listening for auth state changes
+      setPendingRedirect(true);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
       setIsLoading(false);
