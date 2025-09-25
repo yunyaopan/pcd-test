@@ -22,7 +22,7 @@ export function LogoutButton() {
       });
 
       console.log('Session cleared, redirecting to login page...');
-      router.push("/auth/login");
+      window.location.href = "/auth/login";
     } catch (error) {
       console.error('Logout error:', error);
     }

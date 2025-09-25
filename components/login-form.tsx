@@ -48,7 +48,7 @@ export function LoginForm({
       });
 
       console.log('Session synced, redirecting to templates page...');
-      router.push("/protected/templates");
+      window.location.href = "/protected/templates";
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
