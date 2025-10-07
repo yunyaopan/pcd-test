@@ -27,8 +27,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Local env files
-.env
+# Local env files (exclude only local overrides, keep base .env files)
+# .env
 .env*.local
 .env.local
 .env.development.local

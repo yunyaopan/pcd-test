@@ -32,7 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*.local
-.env
+# .env files are now included for Docker builds and Airbase deployment
+# .env
 
 # vercel
 .vercel

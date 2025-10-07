@@ -12,9 +12,17 @@ RUN npm ci
 # Copy the rest of the application code
 COPY . .
 
+# Accept build arguments for Next.js public environment variables (for override)
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY
+
 # Set environment variables for build
-# Note: Environment variables for Supabase should be set at runtime
+# Note: NEXT_PUBLIC_* variables must be set at build time to be embedded in the client bundle
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# Use build args if provided, otherwise .env files will be used by Next.js
+ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-}
+ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY:-}
 
 # Create public directory if it doesn't exist (Next.js may not create it if empty)
 RUN mkdir -p public
@@ -31,9 +39,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Create a non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Create a non-root user (Airbase requires UID 999)
+# Create group with GID 999, ignore if it already exists
+RUN addgroup --system --gid 999 nodejs || true
+RUN adduser --system --uid 999 --ingroup nodejs nextjs
 
 # Copy necessary files from builder
 COPY --from=builder /app/public ./public
@@ -46,10 +55,10 @@ RUN chown -R nextjs:nodejs /app
 # Switch to non-root user
 USER nextjs
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Expose the port the app runs on (Airbase will set PORT at runtime)
+EXPOSE $PORT
 
-# Set the port environment variable
+# Set default port and hostname (Airbase will override PORT at runtime)
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 

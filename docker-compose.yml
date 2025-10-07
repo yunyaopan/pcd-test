@@ -8,12 +8,16 @@ services:
       dockerfile: Dockerfile
       platforms:
         - linux/amd64
+      args:
+        # Build arguments for Next.js public env vars (embedded at build time)
+        - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+        - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY}
     ports:
       - "3000:3000"
     environment:
-      # Add your Supabase environment variables here
+      # Runtime environment variables (also set for consistency)
       - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-      - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY}
       # Add any other environment variables your app needs
     restart: unless-stopped
 
