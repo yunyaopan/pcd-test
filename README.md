@@ -94,6 +94,25 @@ If you wish to just develop locally and not deploy to Vercel, [follow the steps 
 
 > Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
 
+## Docker Deployment
+
+This project can be deployed as a Docker container to GitHub Container Registry (GHCR) or any other container registry.
+
+**Quick Start:**
+
+```bash
+# Build the Docker image
+docker build -t ghcr.io/YOUR_GITHUB_USERNAME/pcd-test:latest .
+
+# Run locally
+docker run -p 3000:3000 \
+  -e NEXT_PUBLIC_SUPABASE_URL="your_supabase_url" \
+  -e NEXT_PUBLIC_SUPABASE_ANON_KEY="your_supabase_anon_key" \
+  ghcr.io/YOUR_GITHUB_USERNAME/pcd-test:latest
+```
+
+For detailed instructions on building, pushing to GHCR, and deploying, see [DOCKER_DEPLOYMENT.md](./DOCKER_DEPLOYMENT.md).
+
 ## Feedback and issues
 
 Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
