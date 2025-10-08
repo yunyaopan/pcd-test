@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
 
   // Then, create evaluation criteria weights if provided
   if (evaluation_criteria_weights && evaluation_criteria_weights.length > 0) {
-    const weightsData = evaluation_criteria_weights.map((weight: any) => ({
+    const weightsData = evaluation_criteria_weights.map((weight: { evaluation_criteria_id: string; weight: number }) => ({
       project_id: project.id,
       evaluation_criteria_id: weight.evaluation_criteria_id,
       weight: weight.weight,
