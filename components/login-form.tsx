@@ -15,6 +15,23 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
 
+// Microsoft icon component
+function MicrosoftIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 23 23"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M0 0h11v11H0z" fill="#f25022" />
+      <path d="M12 0h11v11H12z" fill="#00a4ef" />
+      <path d="M0 12h11v11H0z" fill="#7fba00" />
+      <path d="M12 12h11v11H12z" fill="#ffb900" />
+    </svg>
+  );
+}
+
 export function LoginForm({
   className,
   ...props
@@ -23,6 +40,7 @@ export function LoginForm({
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMicrosoft, setIsLoadingMicrosoft] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +69,34 @@ export function LoginForm({
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleMicrosoftLogin = async () => {
+    setIsLoadingMicrosoft(true);
+    setError(null);
+
+    const supabase = createClient();
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'azure',
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback`,
+          scopes: 'email openid profile',
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
+      
+      if (error) throw error;
+      
+      // The redirect happens automatically, no need to set loading to false
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "An error occurred");
+      setIsLoadingMicrosoft(false);
     }
   };
 
@@ -98,6 +144,28 @@ export function LoginForm({
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Login"}
+              </Button>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleMicrosoftLogin}
+                disabled={isLoadingMicrosoft || isLoading}
+              >
+                <MicrosoftIcon className="mr-2 h-4 w-4" />
+                {isLoadingMicrosoft ? "Redirecting..." : "Sign in with Microsoft"}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
