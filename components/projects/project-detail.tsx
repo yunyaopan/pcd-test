@@ -187,130 +187,97 @@ export function ProjectDetail({ projectId }: ProjectDetailProps) {
         </div>
       </div>
 
-      {/* Evaluation Criteria - First Card */}
-      {project.evaluation_approaches && (
+      {/* Project Type and Evaluation Criteria - First Card */}
+      {project.project_types && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center text-lg sm:text-xl">
               <BarChart3 className="w-5 h-5 mr-2" />
-              <span className="truncate">Evaluation Criteria - {project.evaluation_approaches.name}</span>
+              <span className="truncate">Project Type: {project.project_types.name}</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Mobile-optimized cards for evaluation criteria */}
-            <div className="block sm:hidden space-y-3">
-              <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-gray-300">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium text-gray-900">Price</h4>
-                  <span className="text-lg font-bold text-gray-900">{project.evaluation_approaches.price_percentage}%</span>
+            {/* Price-Quality Ratio Display */}
+            <div className="mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-300">
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-medium text-gray-900">Price</h4>
+                    <span className="text-lg font-bold text-green-600">{project.project_types.price_percentage}%</span>
+                  </div>
+                  <p className="text-sm text-gray-600">Price-based evaluation</p>
                 </div>
-                <p className="text-sm text-gray-600">Price-based evaluation</p>
-              </div>
-              
-              <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-gray-300">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium text-gray-900">Safety</h4>
-                  <span className="text-lg font-bold text-gray-900">{project.evaluation_approaches.safety_percentage}%</span>
+                
+                <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-300">
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-medium text-gray-900">Quality</h4>
+                    <span className="text-lg font-bold text-blue-600">{project.project_types.quality_percentage}%</span>
+                  </div>
+                  <p className="text-sm text-gray-600">Quality-based evaluation criteria</p>
                 </div>
-                <p className="text-sm text-gray-600">Safety compliance evaluation</p>
-              </div>
-              
-              <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-gray-300">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium text-gray-900">Technical</h4>
-                  <span className="text-lg font-bold text-gray-900">{project.evaluation_approaches.technical_percentage}%</span>
-                </div>
-                <div className="text-sm text-gray-600">
-                  {project.evaluation_approaches.technical_criteria ? (
-                    <ul className="list-disc list-inside space-y-1">
-                      {Object.entries(project.evaluation_approaches.technical_criteria).map(([points, description]) => (
-                        <li key={points}>
-                          <span className="font-medium text-gray-900">{points}:</span> {description}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>Technical proposal evaluation</p>
-                  )}
-                </div>
-              </div>
-              
-              <div className="bg-gray-100 p-4 rounded-lg border-l-4 border-gray-400">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-bold text-gray-900">Total</h4>
-                  <span className="text-lg font-bold text-gray-900">
-                    {project.evaluation_approaches.price_percentage + 
-                     project.evaluation_approaches.safety_percentage + 
-                     project.evaluation_approaches.technical_percentage}%
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 mt-1">Complete evaluation criteria</p>
               </div>
             </div>
 
-            {/* Desktop table view */}
-            <div className="hidden sm:block overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-300 min-w-[600px]">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Criteria</th>
-                    <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Percentage</th>
-                    <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Scoring Details</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="border border-gray-300 p-2 sm:p-3 font-medium text-gray-900">Price</td>
-                    <td className="border border-gray-300 p-2 sm:p-3 text-center font-bold text-gray-900">
-                      {project.evaluation_approaches.price_percentage}%
-                    </td>
-                    <td className="border border-gray-300 p-2 sm:p-3">
-                      <span className="text-gray-500">Price-based evaluation</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-300 p-2 sm:p-3 font-medium text-gray-900">Safety</td>
-                    <td className="border border-gray-300 p-2 sm:p-3 text-center font-bold text-gray-900">
-                      {project.evaluation_approaches.safety_percentage}%
-                    </td>
-                    <td className="border border-gray-300 p-2 sm:p-3">
-                      <span className="text-gray-500">Safety compliance evaluation</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="border border-gray-300 p-2 sm:p-3 font-medium text-gray-900">Technical</td>
-                    <td className="border border-gray-300 p-2 sm:p-3 text-center font-bold text-gray-900">
-                      {project.evaluation_approaches.technical_percentage}%
-                    </td>
-                    <td className="border border-gray-300 p-2 sm:p-3">
-                      {project.evaluation_approaches.technical_criteria ? (
-                        <ul className="list-disc list-inside space-y-1 text-sm">
-                          {Object.entries(project.evaluation_approaches.technical_criteria).map(([points, description]) => (
-                            <li key={points} className="flex items-start">
-                              <span className="font-medium text-gray-900 mr-2">{points}:</span>
-                              <span className="text-gray-700">{description}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <span className="text-gray-500">Technical proposal evaluation</span>
+            {/* Evaluation Criteria Weights */}
+            {project.project_evaluation_criteria_weights && project.project_evaluation_criteria_weights.length > 0 && (
+              <div>
+                <h4 className="text-lg font-medium mb-4">Evaluation Criteria Weights</h4>
+                
+                {/* Mobile-optimized cards for evaluation criteria */}
+                <div className="block sm:hidden space-y-3">
+                  {project.project_evaluation_criteria_weights.map((weight) => (
+                    <div key={weight.id} className="bg-gray-50 p-4 rounded-lg border-l-4 border-gray-300">
+                      <div className="flex justify-between items-center mb-2">
+                        <h5 className="font-medium text-gray-900">{weight.evaluation_criteria.name}</h5>
+                        <span className="text-lg font-bold text-gray-900">{weight.weight}%</span>
+                      </div>
+                      {weight.evaluation_criteria.description && (
+                        <p className="text-sm text-gray-600">{weight.evaluation_criteria.description}</p>
                       )}
-                    </td>
-                  </tr>
-                  <tr className="bg-gray-50">
-                    <td className="border border-gray-300 p-2 sm:p-3 font-bold text-gray-900">Total</td>
-                    <td className="border border-gray-300 p-2 sm:p-3 text-center font-bold text-gray-900">
-                      {project.evaluation_approaches.price_percentage + 
-                       project.evaluation_approaches.safety_percentage + 
-                       project.evaluation_approaches.technical_percentage}%
-                    </td>
-                    <td className="border border-gray-300 p-2 sm:p-3">
-                      <span className="text-gray-500">Complete evaluation criteria</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop table view */}
+                <div className="hidden sm:block overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-300 min-w-[600px]">
+                    <thead>
+                      <tr className="bg-gray-50">
+                        <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Criteria</th>
+                        <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Weight</th>
+                        <th className="border border-gray-300 p-2 sm:p-3 text-left font-medium">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {project.project_evaluation_criteria_weights.map((weight) => (
+                        <tr key={weight.id}>
+                          <td className="border border-gray-300 p-2 sm:p-3 font-medium text-gray-900">
+                            {weight.evaluation_criteria.name}
+                          </td>
+                          <td className="border border-gray-300 p-2 sm:p-3 text-center font-bold text-gray-900">
+                            {weight.weight}%
+                          </td>
+                          <td className="border border-gray-300 p-2 sm:p-3">
+                            <span className="text-gray-500">
+                              {weight.evaluation_criteria.description || 'No description provided'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                      <tr className="bg-gray-50">
+                        <td className="border border-gray-300 p-2 sm:p-3 font-bold text-gray-900">Total Quality</td>
+                        <td className="border border-gray-300 p-2 sm:p-3 text-center font-bold text-gray-900">
+                          {project.project_evaluation_criteria_weights.reduce((sum, w) => sum + w.weight, 0)}%
+                        </td>
+                        <td className="border border-gray-300 p-2 sm:p-3">
+                          <span className="text-gray-500">Complete evaluation criteria</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

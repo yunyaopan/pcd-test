@@ -11,13 +11,23 @@ export interface TenderSubmission {
   supplier_remarks: string | null;
 }
 
-export interface EvaluationApproach {
+export interface ProjectType {
   id: string;
   name: string;
   price_percentage: number;
-  safety_percentage: number;
-  technical_percentage: number;
-  technical_criteria: Record<string, string> | null;
+  quality_percentage: number;
+}
+
+export interface EvaluationCriteria {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
+export interface ProjectEvaluationCriteriaWeight {
+  id: string;
+  weight: number;
+  evaluation_criteria: EvaluationCriteria;
 }
 
 export interface ProjectDto {
@@ -30,9 +40,10 @@ export interface ProjectDto {
   description: string | null;
   suppliers_count: number | null;
   status: string | null;
-  evaluation_approach_id: string | null;
+  project_type_id: string | null;
   tender_submissions: TenderSubmission[] | null;
-  evaluation_approaches: EvaluationApproach | null;
+  project_types: ProjectType | null;
+  project_evaluation_criteria_weights: ProjectEvaluationCriteriaWeight[] | null;
   created_at: string;
 }
 

@@ -4,7 +4,7 @@ import { listProjects, ProjectDto } from "@/lib/api/projects";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus } from "lucide-react";
-import { EvaluationApproachModal } from "./evaluation-approach-modal";
+import { ProjectTypeSelectionModal } from "./evaluation-approach-modal";
 import Link from "next/link";
 
 export function ProjectList() {
@@ -67,9 +67,9 @@ export function ProjectList() {
         </div>
       )}
 
-      {/* Evaluation Approach Modal */}
+      {/* Project Type Selection Modal */}
       {showEvaluationModal && (
-        <EvaluationApproachModal
+        <ProjectTypeSelectionModal
           onClose={() => setShowEvaluationModal(false)}
           onProjectCreated={handleProjectCreated}
         />
