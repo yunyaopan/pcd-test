@@ -59,5 +59,5 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Start the application using shell form to properly expand environment variables
-CMD node server.js
+CMD ["node", "server.js"]
 
