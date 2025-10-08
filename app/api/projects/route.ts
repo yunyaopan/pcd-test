@@ -28,6 +28,7 @@ export async function GET() {
       suppliers_count,
       status,
       created_at,
+      project_type_id,
       tender_submissions (
         id,
         schedule_of_rates_no,
@@ -39,6 +40,21 @@ export async function GET() {
         percentage_sign,
         entry_date,
         supplier_remarks
+      ),
+      project_types (
+        id,
+        name,
+        price_percentage,
+        quality_percentage
+      ),
+      project_evaluation_criteria_weights (
+        id,
+        weight,
+        evaluation_criteria (
+          id,
+          name,
+          description
+        )
       )
     `)
     .order("created_at", { ascending: false });
@@ -60,12 +76,55 @@ export async function POST(req: NextRequest) {
     description,
     suppliers_count,
     status,
-    evaluation_approach_id,
+    project_type_id,
+    evaluation_criteria_weights,
     tender_submissions
   } = body;
 
   if (!name) {
     return NextResponse.json({ error: "Project name is required" }, { status: 400 });
+  }
+
+  if (!project_type_id) {
+    return NextResponse.json({ error: "Project type is required" }, { status: 400 });
+  }
+
+  // Get project type to validate weights
+  const { data: projectType, error: projectTypeError } = await supabase
+    .from("project_types")
+    .select("quality_percentage")
+    .eq("id", project_type_id)
+    .single();
+
+  if (projectTypeError) {
+    return NextResponse.json({ error: "Invalid project type" }, { status: 400 });
+  }
+
+  // Validate evaluation criteria weights if provided
+  if (evaluation_criteria_weights && Array.isArray(evaluation_criteria_weights)) {
+    const totalWeight = evaluation_criteria_weights.reduce((sum, weight) => sum + (weight.weight || 0), 0);
+    
+    if (Math.abs(totalWeight - projectType.quality_percentage) > 0.01) {
+      return NextResponse.json({ 
+        error: `Total evaluation criteria weights must equal ${projectType.quality_percentage}%` 
+      }, { status: 400 });
+    }
+
+    // Validate minimum weights
+    for (const weightConfig of evaluation_criteria_weights) {
+      const { data: typeCriteria } = await supabase
+        .from("project_type_evaluation_criteria")
+        .select("minimum_weight")
+        .eq("project_type_id", project_type_id)
+        .eq("evaluation_criteria_id", weightConfig.evaluation_criteria_id)
+        .single();
+
+      if (typeCriteria?.minimum_weight && weightConfig.weight < typeCriteria.minimum_weight) {
+        return NextResponse.json({ 
+          error: `Weight for criteria must be at least ${typeCriteria.minimum_weight}%` 
+        }, { status: 400 });
+      }
+    }
   }
 
   // First, create the project
@@ -80,12 +139,30 @@ export async function POST(req: NextRequest) {
       description,
       suppliers_count: suppliers_count || 0,
       status: status || 'submit evaluation criteria',
-      evaluation_approach_id,
+      project_type_id,
     })
     .select("id,name,document_no,reference_no,publication_date,closing_date,description,suppliers_count,status,created_at")
     .single();
 
   if (projectError) return NextResponse.json({ error: projectError.message }, { status: 500 });
+
+  // Then, create evaluation criteria weights if provided
+  if (evaluation_criteria_weights && evaluation_criteria_weights.length > 0) {
+    const weightsData = evaluation_criteria_weights.map((weight: any) => ({
+      project_id: project.id,
+      evaluation_criteria_id: weight.evaluation_criteria_id,
+      weight: weight.weight,
+    }));
+
+    const { error: weightsError } = await supabase
+      .from("project_evaluation_criteria_weights")
+      .insert(weightsData);
+
+    if (weightsError) {
+      console.error("Failed to insert evaluation criteria weights:", weightsError);
+      // Continue anyway - project is created
+    }
+  }
 
   // Then, create tender submissions if any
   if (tender_submissions && tender_submissions.length > 0) {
