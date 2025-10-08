@@ -1,9 +1,13 @@
 # syntax=docker/dockerfile:1
 
-# Build stage
-FROM --platform=linux/amd64 node:20-alpine AS builder
+# Build stage using Airbase managed image
+FROM gdssingapore/airbase:node-20-builder AS builder
 
 WORKDIR /app
+
+# Set environment variables for build
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV SKIP_ENV_VALIDATION=1
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
@@ -16,10 +20,6 @@ COPY . .
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY
 
-# Set environment variables for build
-# Note: NEXT_PUBLIC_* variables must be set at build time to be embedded in the client bundle
-ENV NEXT_TELEMETRY_DISABLED=1
-
 # Use build args if provided, otherwise .env files will be used by Next.js
 ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-}
 ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY:-}
@@ -30,8 +30,8 @@ RUN mkdir -p public
 # Build the Next.js application
 RUN npm run build
 
-# Production stage
-FROM --platform=linux/amd64 node:20-alpine AS runner
+# Production stage using Airbase managed image
+FROM gdssingapore/airbase:node-20 AS runner
 
 WORKDIR /app
 
@@ -39,29 +39,25 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Create a non-root user (Airbase requires UID 999)
-# Create group with GID 999, ignore if it already exists
-RUN addgroup --system --gid 999 nodejs || true
-RUN adduser --system --uid 999 --ingroup nodejs nextjs
+# Create necessary directories with correct ownership
+RUN mkdir .next && chown app:app .next
+RUN mkdir .npm && chown app:app .npm
 
-# Copy necessary files from builder
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+# Copy necessary files from builder with correct ownership
+COPY --from=builder --chown=app:app /app/.next/standalone ./
+COPY --from=builder --chown=app:app /app/.next/static ./.next/static
+COPY --from=builder --chown=app:app /app/public ./public
 
-# Set correct permissions
-RUN chown -R nextjs:nodejs /app
+# Switch to non-root user (pre-configured in managed image)
+USER app
 
-# Switch to non-root user
-USER nextjs
-
-# Expose the port the app runs on (Airbase will set PORT at runtime)
-EXPOSE $PORT
+# Expose the port the app runs on
+EXPOSE 3000
 
 # Set default port and hostname (Airbase will override PORT at runtime)
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Start the application
-CMD ["node", "server.js"]
+# Start the application using shell form to properly expand environment variables
+CMD node server.js
 
