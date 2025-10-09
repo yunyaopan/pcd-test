@@ -79,10 +79,13 @@ export function LoginForm({
     const supabase = createClient();
 
     try {
+      // Use NEXT_PUBLIC_SITE_URL if available, otherwise fall back to window.location.origin
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'azure',
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`,
+          redirectTo: `${siteUrl}/api/auth/callback`,
           scopes: 'openid', // Only request the most basic scope
         },
       });
