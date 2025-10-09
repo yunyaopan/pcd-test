@@ -83,11 +83,7 @@ export function LoginForm({
         provider: 'azure',
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback`,
-          scopes: 'email openid profile',
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
+          scopes: 'openid', // Only request the most basic scope
         },
       });
       
